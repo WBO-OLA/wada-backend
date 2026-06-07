@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+
+        - id: personnel-service
+          uri: lb://personnel-service
+          predicates:
+            - Path=/api/personnel/**
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/**
+
+        - id: finance-service
+          uri: lb://finance-service
+          predicates:
+            - Path=/api/finance/**
+
+        - id: reporting-service
+          uri: lb://reporting-service
+          predicates:
+            - Path=/api/reporting/**
+
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

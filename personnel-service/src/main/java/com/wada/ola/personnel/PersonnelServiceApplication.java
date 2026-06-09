@@ -1,4 +1,4 @@
-﻿package com.wada.ola.personnel;
+package com.wada.ola.personnel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,4 +10,3 @@ public class PersonnelServiceApplication {
         SpringApplication.run(PersonnelServiceApplication.class, args);
     }
 }
-

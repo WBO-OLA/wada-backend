@@ -1,6 +1,7 @@
-﻿package com.wada.ola.inventory.controller;
+package com.wada.ola.inventory.controller;
 
 import com.wada.ola.common.dto.ApiResponse;
+import com.wada.ola.inventory.dto.ItemRequest;
 import com.wada.ola.inventory.entity.Item;
 import com.wada.ola.inventory.service.ItemService;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,14 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Item>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(itemService.findAll()));
+    public ResponseEntity<ApiResponse<List<Item>>> getAll(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Long warehouseId) {
+        List<Item> items;
+        if (category != null) items = itemService.findByCategory(category);
+        else if (warehouseId != null) items = itemService.findByWarehouse(warehouseId);
+        else items = itemService.findAll();
+        return ResponseEntity.ok(ApiResponse.ok(items));
     }
 
     @GetMapping("/{id}")
@@ -35,13 +42,14 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Item>> create(@RequestBody Item item) {
-        return ResponseEntity.ok(ApiResponse.ok("Item created", itemService.create(item)));
+    public ResponseEntity<ApiResponse<Item>> create(@RequestBody ItemRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Item created", itemService.create(request)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Item>> update(@PathVariable Long id, @RequestBody Item item) {
-        return ResponseEntity.ok(ApiResponse.ok("Item updated", itemService.update(id, item)));
+    public ResponseEntity<ApiResponse<Item>> update(@PathVariable Long id,
+                                                     @RequestBody ItemRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Item updated", itemService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
@@ -50,4 +58,3 @@ public class ItemController {
         return ResponseEntity.ok(ApiResponse.ok("Item deleted", null));
     }
 }
-

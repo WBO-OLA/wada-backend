@@ -1,4 +1,4 @@
-﻿package com.wada.ola.common.exception;
+package com.wada.ola.common.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -10,4 +10,3 @@ public class ResourceNotFoundException extends RuntimeException {
         super(resource + " not found with id: " + id);
     }
 }
-

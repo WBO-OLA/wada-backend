@@ -1,4 +1,4 @@
-﻿package com.wada.ola.common.exception;
+package com.wada.ola.common.exception;
 
 import com.wada.ola.common.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -27,4 +27,3 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("An unexpected error occurred"));
     }
 }
-

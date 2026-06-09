@@ -1,4 +1,4 @@
-﻿package com.wada.ola.inventory.repository;
+package com.wada.ola.inventory.repository;
 
 import com.wada.ola.inventory.entity.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +10,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> findBySku(String sku);
     List<Item> findByCategory(String category);
     List<Item> findByQuantityLessThan(Integer threshold);
+    List<Item> findByWarehouseId(Long warehouseId);
 }
-

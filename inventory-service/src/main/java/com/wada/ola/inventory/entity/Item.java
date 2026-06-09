@@ -1,8 +1,7 @@
-﻿package com.wada.ola.inventory.entity;
+package com.wada.ola.inventory.entity;
 
 import com.wada.ola.common.entity.BaseEntity;
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 
 @Entity
@@ -25,6 +24,10 @@ public class Item extends BaseEntity {
 
     private String category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -42,5 +45,7 @@ public class Item extends BaseEntity {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
-}
 
+    public Warehouse getWarehouse() { return warehouse; }
+    public void setWarehouse(Warehouse warehouse) { this.warehouse = warehouse; }
+}

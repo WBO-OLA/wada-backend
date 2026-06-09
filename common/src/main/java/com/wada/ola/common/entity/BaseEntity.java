@@ -1,4 +1,4 @@
-﻿package com.wada.ola.common.entity;
+package com.wada.ola.common.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -30,4 +30,3 @@ public abstract class BaseEntity {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }
-

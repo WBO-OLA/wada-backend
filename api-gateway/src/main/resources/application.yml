@@ -7,6 +7,21 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
       routes:
         - id: auth-service
           uri: lb://auth-service
@@ -31,7 +46,7 @@ spring:
         - id: reporting-service
           uri: lb://reporting-service
           predicates:
-            - Path=/api/reporting/**
+            - Path=/api/reports/**
 
 server:
   port: 8080
@@ -40,5 +55,29 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+    initial-instance-info-replication-interval-seconds: 5
+    registry-fetch-interval-seconds: 5
   instance:
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# Same secret as auth-service — keep in sync
+jwt:
+  secret: dGhpcylzYS1kZXYtc2VjcmV0LWtleS10aGF0LWlzLWxvbmctZW5vdWdoLTI1Ng==

@@ -1,7 +1,8 @@
-﻿package com.wada.ola.auth.entity;
+package com.wada.ola.auth.entity;
 
 import com.wada.ola.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -20,6 +21,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    private boolean deleted = false;
+    private LocalDateTime deletedAt;
+
     public enum Role { USER, ADMIN, MANAGER }
 
     public String getUsername() { return username; }
@@ -33,5 +37,10 @@ public class User extends BaseEntity {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
-}
 
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+}

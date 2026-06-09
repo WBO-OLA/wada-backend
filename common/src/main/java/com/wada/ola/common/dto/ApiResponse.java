@@ -1,4 +1,4 @@
-﻿package com.wada.ola.common.dto;
+package com.wada.ola.common.dto;
 
 import java.time.LocalDateTime;
 
@@ -33,4 +33,3 @@ public class ApiResponse<T> {
     public T getData() { return data; }
     public LocalDateTime getTimestamp() { return timestamp; }
 }
-

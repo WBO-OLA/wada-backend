@@ -1,6 +1,5 @@
 package com.wada.ola.finance.controller;
 
-import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.finance.dto.BudgetActivationRequest;
 import com.wada.ola.finance.dto.BudgetRequest;
 import com.wada.ola.finance.entity.Budget;
@@ -8,6 +7,7 @@ import com.wada.ola.finance.service.BudgetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/finance/budgets")
@@ -20,41 +20,39 @@ public class BudgetController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Budget>>> getAll(
-            @RequestParam(required = false) Integer fiscalYear) {
-        return ResponseEntity.ok(ApiResponse.ok(budgetService.findAll(fiscalYear)));
+    public List<Budget> getAll(@RequestParam(required = false) Integer fiscalYear) {
+        return budgetService.findAll(fiscalYear);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Budget>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(budgetService.findById(id)));
+    public Budget getById(@PathVariable Long id) {
+        return budgetService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Budget>> create(@RequestBody BudgetRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Budget created", budgetService.create(request)));
+    public Budget create(@RequestBody BudgetRequest request) {
+        return budgetService.create(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Budget>> update(@PathVariable Long id,
-                                                       @RequestBody BudgetRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Budget updated", budgetService.update(id, request)));
+    public Budget update(@PathVariable Long id, @RequestBody BudgetRequest request) {
+        return budgetService.update(id, request);
     }
 
     @PatchMapping("/{id}/activate")
-    public ResponseEntity<ApiResponse<Budget>> activate(@PathVariable Long id,
-                                                         @RequestBody BudgetActivationRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Budget activated", budgetService.activate(id, request)));
+    public Budget activate(@PathVariable Long id, @RequestBody BudgetActivationRequest request) {
+        return budgetService.activate(id, request);
     }
 
     @PatchMapping("/{id}/close")
-    public ResponseEntity<ApiResponse<Budget>> close(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok("Budget closed", budgetService.close(id)));
+    public Budget close(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
+        String closedBy = body != null ? body.getOrDefault("closedBy", "system") : "system";
+        return budgetService.close(id, closedBy);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         budgetService.delete(id);
-        return ResponseEntity.ok(ApiResponse.ok("Budget deleted", null));
+        return ResponseEntity.noContent().build();
     }
 }

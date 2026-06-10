@@ -6,7 +6,9 @@ import com.wada.ola.finance.entity.Income;
 import com.wada.ola.finance.service.IncomeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/finance/incomes")
@@ -37,5 +39,17 @@ public class IncomeController {
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         incomeService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Income deleted", null));
+    }
+
+    @GetMapping("/aggregate")
+    public ResponseEntity<Map<String, Object>> aggregate() {
+        Map<String, BigDecimal> byGroup = incomeService.aggregateByGroup();
+        Map<String, BigDecimal> byCountry = incomeService.aggregateByCountry();
+        BigDecimal globalTotal = incomeService.globalTotal();
+        return ResponseEntity.ok(Map.of(
+                "byGroup", byGroup,
+                "byCountry", byCountry,
+                "globalTotal", globalTotal
+        ));
     }
 }

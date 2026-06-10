@@ -22,7 +22,6 @@ public class PersonnelReportService {
         PersonnelSummaryDTO dto = new PersonnelSummaryDTO();
         dto.setTotalMembers(all.size());
         dto.setActive(all.stream().filter(m -> m.getStatus() == MemberStatus.ACTIVE).count());
-        dto.setNewJoiners(all.stream().filter(m -> m.getStatus() == MemberStatus.NEW_JOINER).count());
         dto.setInjured(all.stream().filter(m -> m.getStatus() == MemberStatus.INJURED).count());
         dto.setRetired(all.stream().filter(m -> m.getStatus() == MemberStatus.RETIRED).count());
         dto.setPassedAway(all.stream().filter(m -> m.getStatus() == MemberStatus.PASSED_AWAY).count());

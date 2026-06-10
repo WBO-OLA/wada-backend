@@ -12,7 +12,7 @@ public class MemberRequest {
     private String phone;
     private String email;
     private LocalDate dateOfBirth;
-    private LocalDate dateJoined;
+    private LocalDate joinDate;
     private Member.MilitaryRank rank;
     private String unit;
     private Member.MemberStatus status;
@@ -39,8 +39,8 @@ public class MemberRequest {
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    public LocalDate getDateJoined() { return dateJoined; }
-    public void setDateJoined(LocalDate dateJoined) { this.dateJoined = dateJoined; }
+    public LocalDate getJoinDate() { return joinDate; }
+    public void setJoinDate(LocalDate joinDate) { this.joinDate = joinDate; }
 
     public Member.MilitaryRank getRank() { return rank; }
     public void setRank(Member.MilitaryRank rank) { this.rank = rank; }

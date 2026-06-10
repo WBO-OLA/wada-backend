@@ -5,7 +5,6 @@ import java.util.Map;
 public class PersonnelSummary {
     private long totalMembers;
     private long active;
-    private long newJoiners;
     private long injured;
     private long retired;
     private long passedAway;
@@ -16,8 +15,6 @@ public class PersonnelSummary {
     public void setTotalMembers(long v) { this.totalMembers = v; }
     public long getActive() { return active; }
     public void setActive(long v) { this.active = v; }
-    public long getNewJoiners() { return newJoiners; }
-    public void setNewJoiners(long v) { this.newJoiners = v; }
     public long getInjured() { return injured; }
     public void setInjured(long v) { this.injured = v; }
     public long getRetired() { return retired; }

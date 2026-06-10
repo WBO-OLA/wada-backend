@@ -125,7 +125,7 @@ public class MemberService {
         member.setPhone(request.getPhone());
         member.setEmail(request.getEmail());
         member.setDateOfBirth(request.getDateOfBirth());
-        member.setDateJoined(request.getDateJoined());
+        member.setJoinDate(request.getJoinDate());
         member.setRank(request.getRank());
         member.setUnit(request.getUnit());
         if (request.getStatus() != null) {

@@ -15,6 +15,15 @@ public class Income extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Column(nullable = false)
+    private String currency = "USD";
+
+    @Column(nullable = false)
+    private String communityGroup;
+
+    @Column(nullable = false)
+    private String country;
+
     private String source;
     private String category;
     private LocalDate receivedDate;
@@ -30,6 +39,15 @@ public class Income extends BaseEntity {
 
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
+
+    public String getCommunityGroup() { return communityGroup; }
+    public void setCommunityGroup(String communityGroup) { this.communityGroup = communityGroup; }
+
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
 
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }

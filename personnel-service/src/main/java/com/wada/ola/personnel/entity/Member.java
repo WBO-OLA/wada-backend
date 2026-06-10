@@ -24,7 +24,9 @@ public class Member extends BaseEntity {
     private String email;
 
     private LocalDate dateOfBirth;
-    private LocalDate dateJoined;
+
+    @Column(name = "join_date")
+    private LocalDate joinDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -35,7 +37,7 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MemberStatus status = MemberStatus.NEW_JOINER;
+    private MemberStatus status = MemberStatus.ACTIVE;
 
     private String notes;
 
@@ -47,7 +49,7 @@ public class Member extends BaseEntity {
     }
 
     public enum MemberStatus {
-        ACTIVE, NEW_JOINER, INJURED, RETIRED, PASSED_AWAY
+        ACTIVE, INJURED, RETIRED, PASSED_AWAY
     }
 
     public String getMilitaryId() { return militaryId; }
@@ -71,8 +73,8 @@ public class Member extends BaseEntity {
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    public LocalDate getDateJoined() { return dateJoined; }
-    public void setDateJoined(LocalDate dateJoined) { this.dateJoined = dateJoined; }
+    public LocalDate getJoinDate() { return joinDate; }
+    public void setJoinDate(LocalDate joinDate) { this.joinDate = joinDate; }
 
     public MilitaryRank getRank() { return rank; }
     public void setRank(MilitaryRank rank) { this.rank = rank; }

@@ -12,42 +12,49 @@ import java.math.BigDecimal;
 @Service
 public class FinanceReportService {
 
+    private final IncomeRepository incomeRepository;
     private final BudgetRepository budgetRepository;
     private final ExpenseRepository expenseRepository;
-    private final IncomeRepository incomeRepository;
 
-    public FinanceReportService(BudgetRepository budgetRepository,
-                                 ExpenseRepository expenseRepository,
-                                 IncomeRepository incomeRepository) {
+    public FinanceReportService(IncomeRepository incomeRepository,
+                                 BudgetRepository budgetRepository,
+                                 ExpenseRepository expenseRepository) {
+        this.incomeRepository = incomeRepository;
         this.budgetRepository = budgetRepository;
         this.expenseRepository = expenseRepository;
-        this.incomeRepository = incomeRepository;
     }
 
     public FinanceSummaryDTO getSummary() {
-        var budgets = budgetRepository.findAll();
-        var expenses = expenseRepository.findAll();
         var incomes = incomeRepository.findAll();
+        var budgets = budgetRepository.findAll();
+        var activeBudgets = budgetRepository.findByStatus(BudgetStatus.ACTIVE);
+        var expenses = expenseRepository.findAll();
+        var approvedExpenses = expenseRepository.findByStatus(ExpenseStatus.APPROVED);
+        var pendingExpenses = expenseRepository.findByStatus(ExpenseStatus.PENDING);
 
         FinanceSummaryDTO dto = new FinanceSummaryDTO();
-        dto.setTotalBudgets(budgets.size());
-        dto.setActiveBudgets(budgets.stream().filter(b -> b.getStatus() == BudgetStatus.ACTIVE).count());
-        dto.setTotalBudgetAmount(budgets.stream()
-                .map(b -> b.getTotalAmount())
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
-        dto.setTotalAllocatedAmount(budgets.stream()
-                .map(b -> b.getAllocatedAmount())
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
-        dto.setPendingExpenses(expenses.stream().filter(e -> e.getStatus() == ExpenseStatus.PENDING).count());
-        dto.setApprovedExpenses(expenses.stream().filter(e -> e.getStatus() == ExpenseStatus.APPROVED).count());
-        dto.setApprovedExpensesTotal(expenses.stream()
-                .filter(e -> e.getStatus() == ExpenseStatus.APPROVED)
-                .map(e -> e.getAmount())
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
         dto.setTotalIncomes(incomes.size());
         dto.setTotalIncomeAmount(incomes.stream()
-                .map(i -> i.getAmount())
+                .map(i -> i.getAmount() != null ? i.getAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        dto.setTotalBudgets(budgets.size());
+        dto.setActiveBudgets(activeBudgets.size());
+        dto.setTotalBudgetAmount(budgets.stream()
+                .map(b -> b.getTotalAmount() != null ? b.getTotalAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        dto.setTotalAllocatedAmount(budgets.stream()
+                .map(b -> b.getAllocatedAmount() != null ? b.getAllocatedAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        dto.setTotalExpenses(expenses.size());
+        dto.setPendingExpenses(pendingExpenses.size());
+        dto.setApprovedExpenses(approvedExpenses.size());
+        dto.setTotalApprovedExpenseAmount(approvedExpenses.stream()
+                .map(e -> e.getAmount() != null ? e.getAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
         return dto;
     }
 }

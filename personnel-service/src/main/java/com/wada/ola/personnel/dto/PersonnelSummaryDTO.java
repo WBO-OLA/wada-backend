@@ -6,7 +6,6 @@ public class PersonnelSummaryDTO {
 
     private long totalMembers;
     private long active;
-    private long newJoiners;
     private long injured;
     private long retired;
     private long passedAway;
@@ -18,9 +17,6 @@ public class PersonnelSummaryDTO {
 
     public long getActive() { return active; }
     public void setActive(long active) { this.active = active; }
-
-    public long getNewJoiners() { return newJoiners; }
-    public void setNewJoiners(long newJoiners) { this.newJoiners = newJoiners; }
 
     public long getInjured() { return injured; }
     public void setInjured(long injured) { this.injured = injured; }

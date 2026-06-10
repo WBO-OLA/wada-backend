@@ -10,6 +10,9 @@ import com.wada.ola.finance.repository.LedgerEntryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 @Service
 public class IncomeService {
@@ -36,6 +39,9 @@ public class IncomeService {
         Income income = new Income();
         income.setTitle(request.getTitle());
         income.setAmount(request.getAmount());
+        income.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
+        income.setCommunityGroup(request.getCommunityGroup());
+        income.setCountry(request.getCountry());
         income.setSource(request.getSource());
         income.setCategory(request.getCategory());
         income.setReceivedDate(request.getReceivedDate());
@@ -46,7 +52,7 @@ public class IncomeService {
         LedgerEntry entry = new LedgerEntry();
         entry.setType(EntryType.INCOME_RECEIVED);
         entry.setAmount(saved.getAmount());
-        entry.setDescription("Income received: " + saved.getTitle());
+        entry.setDescription("Income received: " + saved.getTitle() + " [" + saved.getCommunityGroup() + ", " + saved.getCountry() + "]");
         entry.setRelatedEntityType("Income");
         entry.setRelatedEntityId(saved.getId());
         entry.setCreatedBy(request.getRecordedBy());
@@ -59,5 +65,27 @@ public class IncomeService {
             throw new ResourceNotFoundException("Income not found with id: " + id);
         }
         incomeRepository.deleteById(id);
+    }
+
+    public Map<String, BigDecimal> aggregateByGroup() {
+        return incomeRepository.findAll().stream()
+                .collect(Collectors.groupingBy(
+                        i -> i.getCommunityGroup() != null ? i.getCommunityGroup() : "Unknown",
+                        Collectors.reducing(BigDecimal.ZERO, Income::getAmount, BigDecimal::add)
+                ));
+    }
+
+    public Map<String, BigDecimal> aggregateByCountry() {
+        return incomeRepository.findAll().stream()
+                .collect(Collectors.groupingBy(
+                        i -> i.getCountry() != null ? i.getCountry() : "Unknown",
+                        Collectors.reducing(BigDecimal.ZERO, Income::getAmount, BigDecimal::add)
+                ));
+    }
+
+    public BigDecimal globalTotal() {
+        return incomeRepository.findAll().stream()
+                .map(i -> i.getAmount() != null ? i.getAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

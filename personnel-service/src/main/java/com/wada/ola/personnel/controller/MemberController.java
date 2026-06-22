@@ -26,11 +26,11 @@ public class MemberController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<Member>>> getAll(
             @RequestParam(required = false) Member.MemberStatus status,
-            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) Long commandId,
             @RequestParam(required = false) Member.MilitaryRank rank) {
         List<Member> members;
         if (status != null) members = memberService.findByStatus(status);
-        else if (unit != null) members = memberService.findByUnit(unit);
+        else if (commandId != null) members = memberService.findByCommandId(commandId);
         else if (rank != null) members = memberService.findByRank(rank);
         else members = memberService.findAll();
         return ResponseEntity.ok(ApiResponse.ok(members));

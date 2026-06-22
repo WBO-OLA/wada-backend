@@ -32,8 +32,9 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private MilitaryRank rank = MilitaryRank.RECRUIT;
 
-    @Column(nullable = false)
-    private String unit;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "command_id")
+    private Command command;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -79,8 +80,8 @@ public class Member extends BaseEntity {
     public MilitaryRank getRank() { return rank; }
     public void setRank(MilitaryRank rank) { this.rank = rank; }
 
-    public String getUnit() { return unit; }
-    public void setUnit(String unit) { this.unit = unit; }
+    public Command getCommand() { return command; }
+    public void setCommand(Command command) { this.command = command; }
 
     public MemberStatus getStatus() { return status; }
     public void setStatus(MemberStatus status) { this.status = status; }

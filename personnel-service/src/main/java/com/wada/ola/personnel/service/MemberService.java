@@ -4,9 +4,11 @@ import com.wada.ola.common.exception.ResourceNotFoundException;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
 import com.wada.ola.personnel.dto.MemberStatusUpdateRequest;
+import com.wada.ola.personnel.entity.Command;
 import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberRankHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
+import com.wada.ola.personnel.repository.CommandRepository;
 import com.wada.ola.personnel.repository.MemberRankHistoryRepository;
 import com.wada.ola.personnel.repository.MemberRepository;
 import com.wada.ola.personnel.repository.MemberStatusHistoryRepository;
@@ -21,13 +23,16 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberStatusHistoryRepository statusHistoryRepository;
     private final MemberRankHistoryRepository rankHistoryRepository;
+    private final CommandRepository commandRepository;
 
     public MemberService(MemberRepository memberRepository,
                          MemberStatusHistoryRepository statusHistoryRepository,
-                         MemberRankHistoryRepository rankHistoryRepository) {
+                         MemberRankHistoryRepository rankHistoryRepository,
+                         CommandRepository commandRepository) {
         this.memberRepository = memberRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.rankHistoryRepository = rankHistoryRepository;
+        this.commandRepository = commandRepository;
     }
 
     public List<Member> findAll() {
@@ -43,8 +48,8 @@ public class MemberService {
         return memberRepository.findByStatus(status);
     }
 
-    public List<Member> findByUnit(String unit) {
-        return memberRepository.findByUnit(unit);
+    public List<Member> findByCommandId(Long commandId) {
+        return memberRepository.findByCommandId(commandId);
     }
 
     public List<Member> findByRank(Member.MilitaryRank rank) {
@@ -127,7 +132,13 @@ public class MemberService {
         member.setDateOfBirth(request.getDateOfBirth());
         member.setJoinDate(request.getJoinDate());
         member.setRank(request.getRank());
-        member.setUnit(request.getUnit());
+        if (request.getCommandId() != null) {
+            Command command = commandRepository.findById(request.getCommandId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Command", request.getCommandId()));
+            member.setCommand(command);
+        } else {
+            member.setCommand(null);
+        }
         if (request.getStatus() != null) {
             member.setStatus(request.getStatus());
         }

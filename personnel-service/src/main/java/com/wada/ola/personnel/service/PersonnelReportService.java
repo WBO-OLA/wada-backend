@@ -27,8 +27,8 @@ public class PersonnelReportService {
         dto.setPassedAway(all.stream().filter(m -> m.getStatus() == MemberStatus.PASSED_AWAY).count());
         dto.setByRank(all.stream().collect(
                 Collectors.groupingBy(m -> m.getRank().name(), Collectors.counting())));
-        dto.setByUnit(all.stream().collect(
-                Collectors.groupingBy(m -> m.getUnit() != null ? m.getUnit() : "Unassigned", Collectors.counting())));
+        dto.setByCommand(all.stream().collect(
+                Collectors.groupingBy(m -> m.getCommand() != null ? m.getCommand().getName() : "Unassigned", Collectors.counting())));
         return dto;
     }
 }

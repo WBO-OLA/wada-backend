@@ -14,7 +14,7 @@ public class MemberRequest {
     private LocalDate dateOfBirth;
     private LocalDate joinDate;
     private Member.MilitaryRank rank;
-    private String unit;
+    private Long commandId;
     private Member.MemberStatus status;
     private String notes;
 
@@ -45,8 +45,8 @@ public class MemberRequest {
     public Member.MilitaryRank getRank() { return rank; }
     public void setRank(Member.MilitaryRank rank) { this.rank = rank; }
 
-    public String getUnit() { return unit; }
-    public void setUnit(String unit) { this.unit = unit; }
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 
     public Member.MemberStatus getStatus() { return status; }
     public void setStatus(Member.MemberStatus status) { this.status = status; }

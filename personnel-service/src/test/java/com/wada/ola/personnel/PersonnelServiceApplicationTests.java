@@ -1,4 +1,4 @@
-﻿package com.wada.ola.personnel;
+package com.wada.ola.personnel;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

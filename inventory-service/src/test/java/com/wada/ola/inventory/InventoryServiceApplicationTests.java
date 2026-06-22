@@ -1,4 +1,4 @@
-﻿package com.wada.ola.inventory;
+package com.wada.ola.inventory;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

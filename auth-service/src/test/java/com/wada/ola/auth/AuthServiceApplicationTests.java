@@ -1,4 +1,4 @@
-﻿package com.wada.ola.auth;
+package com.wada.ola.auth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

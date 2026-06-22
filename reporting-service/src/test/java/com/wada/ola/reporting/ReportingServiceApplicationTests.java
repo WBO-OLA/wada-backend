@@ -1,4 +1,4 @@
-﻿package com.wada.ola.reporting;
+package com.wada.ola.reporting;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -48,6 +48,7 @@ public class IncomeService {
         income.setReference(request.getReference());
         income.setRecordedBy(request.getRecordedBy());
         income.setNotes(request.getNotes());
+        income.setCommandId(request.getCommandId());
         Income saved = incomeRepository.save(income);
         LedgerEntry entry = new LedgerEntry();
         entry.setType(EntryType.INCOME_RECEIVED);

@@ -52,6 +52,11 @@ public class MemberService {
         return memberRepository.findByCommandId(commandId);
     }
 
+    public List<Member> findByCommandIds(List<Long> commandIds) {
+        if (commandIds == null || commandIds.isEmpty()) return findAll();
+        return memberRepository.findByCommandIdIn(commandIds);
+    }
+
     public List<Member> findByRank(Member.MilitaryRank rank) {
         return memberRepository.findByRank(rank);
     }
@@ -124,11 +129,19 @@ public class MemberService {
 
     private void applyRequest(Member member, MemberRequest request) {
         member.setMilitaryId(request.getMilitaryId());
+        member.setServiceNumber(request.getServiceNumber());
+        member.setCodeName(request.getCodeName());
         member.setFirstName(request.getFirstName());
         member.setLastName(request.getLastName());
+        member.setGender(request.getGender());
         member.setNationalId(request.getNationalId());
+        member.setNationality(request.getNationality());
+        member.setAddress(request.getAddress());
         member.setPhone(request.getPhone());
         member.setEmail(request.getEmail());
+        member.setPhotoPath(request.getPhotoPath());
+        member.setUnit(request.getUnit());
+        member.setRole(request.getRole());
         member.setDateOfBirth(request.getDateOfBirth());
         member.setJoinDate(request.getJoinDate());
         member.setRank(request.getRank());

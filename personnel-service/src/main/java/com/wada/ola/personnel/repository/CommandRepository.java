@@ -24,4 +24,7 @@ public interface CommandRepository extends JpaRepository<Command, Long> {
 
     @Query("SELECT c FROM Command c LEFT JOIN FETCH c.parent WHERE c.parent IS NULL")
     List<Command> findByParentIsNull();
+
+    @Query("SELECT c FROM Command c LEFT JOIN FETCH c.parent WHERE c.parent.id IN :parentIds")
+    List<Command> findByParentIdIn(@Param("parentIds") List<Long> parentIds);
 }

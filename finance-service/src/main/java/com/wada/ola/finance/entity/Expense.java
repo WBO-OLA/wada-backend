@@ -36,6 +36,8 @@ public class Expense extends BaseEntity {
     private String reference;
     private String notes;
 
+    private Long commandId;
+
     public enum ExpenseStatus { PENDING, APPROVED, REJECTED, CANCELLED }
 
     public String getTitle() { return title; }
@@ -73,4 +75,7 @@ public class Expense extends BaseEntity {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

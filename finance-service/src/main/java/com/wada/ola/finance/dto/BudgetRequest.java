@@ -10,6 +10,7 @@ public class BudgetRequest {
     private String description;
     private String createdBy;
     private String notes;
+    private Long commandId;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -31,4 +32,7 @@ public class BudgetRequest {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

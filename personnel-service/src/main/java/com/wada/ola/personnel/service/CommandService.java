@@ -7,6 +7,7 @@ import com.wada.ola.personnel.repository.CommandRepository;
 import com.wada.ola.personnel.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,6 +37,24 @@ public class CommandService {
     public List<Command> findChildren(Long parentId) {
         findById(parentId);
         return commandRepository.findByParentId(parentId);
+    }
+
+    /** Returns IDs of the given command and all its descendants (recursive BFS). */
+    public List<Long> getAllDescendantIds(Long rootId) {
+        findById(rootId); // validate existence
+        List<Long> collected = new ArrayList<>();
+        collected.add(rootId);
+        List<Long> frontier = new ArrayList<>();
+        frontier.add(rootId);
+        while (!frontier.isEmpty()) {
+            List<Command> children = commandRepository.findByParentIdIn(frontier);
+            frontier.clear();
+            for (Command child : children) {
+                collected.add(child.getId());
+                frontier.add(child.getId());
+            }
+        }
+        return collected;
     }
 
     public Command create(CommandRequest request) {

@@ -53,6 +53,7 @@ public class ExpenseService {
         expense.setSubmittedBy(request.getSubmittedBy());
         expense.setReference(request.getReference());
         expense.setNotes(request.getNotes());
+        expense.setCommandId(request.getCommandId());
         if (request.getBudgetId() != null) {
             Budget budget = budgetRepository.findById(request.getBudgetId())
                     .orElseThrow(() -> new ResourceNotFoundException("Budget not found with id: " + request.getBudgetId()));

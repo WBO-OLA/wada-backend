@@ -24,6 +24,8 @@ public class Item extends BaseEntity {
 
     private String category;
 
+    private Long commandId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;
@@ -48,4 +50,7 @@ public class Item extends BaseEntity {
 
     public Warehouse getWarehouse() { return warehouse; }
     public void setWarehouse(Warehouse warehouse) { this.warehouse = warehouse; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

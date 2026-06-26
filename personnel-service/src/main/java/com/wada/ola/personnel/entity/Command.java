@@ -23,7 +23,7 @@ public class Command extends BaseEntity {
     private Command parent;
 
     public enum CommandType {
-        GLOBAL, REGION, UNIT
+        CHIEF, ZONE, REGION, UNIT
     }
 
     public String getName() { return name; }

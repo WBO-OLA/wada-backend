@@ -9,4 +9,5 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     List<Budget> findByFiscalYear(Integer fiscalYear);
     List<Budget> findByStatus(BudgetStatus status);
     List<Budget> findByDepartment(String department);
+    List<Budget> findByCommandIdIn(List<Long> commandIds);
 }

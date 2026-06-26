@@ -11,4 +11,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByCategory(String category);
     List<Item> findByQuantityLessThan(Integer threshold);
     List<Item> findByWarehouseId(Long warehouseId);
+    List<Item> findByCommandIdIn(List<Long> commandIds);
 }

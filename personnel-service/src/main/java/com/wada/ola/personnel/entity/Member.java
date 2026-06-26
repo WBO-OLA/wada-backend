@@ -11,17 +11,28 @@ public class Member extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String militaryId;
 
+    private String serviceNumber;
+    private String codeName;
+
     @Column(nullable = false)
     private String firstName;
 
     @Column(nullable = false)
     private String lastName;
 
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
     @Column(unique = true)
     private String nationalId;
 
+    private String nationality;
+    private String address;
     private String phone;
     private String email;
+    private String photoPath;
+    private String unit;
+    private String role;
 
     private LocalDate dateOfBirth;
 
@@ -42,6 +53,10 @@ public class Member extends BaseEntity {
 
     private String notes;
 
+    public enum Gender {
+        MALE, FEMALE, OTHER
+    }
+
     public enum MilitaryRank {
         RECRUIT, PRIVATE, CORPORAL, SERGEANT, STAFF_SERGEANT,
         WARRANT_OFFICER, SECOND_LIEUTENANT, FIRST_LIEUTENANT,
@@ -55,6 +70,30 @@ public class Member extends BaseEntity {
 
     public String getMilitaryId() { return militaryId; }
     public void setMilitaryId(String militaryId) { this.militaryId = militaryId; }
+
+    public String getServiceNumber() { return serviceNumber; }
+    public void setServiceNumber(String serviceNumber) { this.serviceNumber = serviceNumber; }
+
+    public String getCodeName() { return codeName; }
+    public void setCodeName(String codeName) { this.codeName = codeName; }
+
+    public Gender getGender() { return gender; }
+    public void setGender(Gender gender) { this.gender = gender; }
+
+    public String getNationality() { return nationality; }
+    public void setNationality(String nationality) { this.nationality = nationality; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getPhotoPath() { return photoPath; }
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }

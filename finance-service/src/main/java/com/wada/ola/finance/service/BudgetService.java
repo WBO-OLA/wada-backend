@@ -47,6 +47,7 @@ public class BudgetService {
         budget.setDescription(request.getDescription());
         budget.setCreatedBy(request.getCreatedBy());
         budget.setNotes(request.getNotes());
+        budget.setCommandId(request.getCommandId());
         Budget saved = budgetRepository.save(budget);
         LedgerEntry entry = new LedgerEntry();
         entry.setType(EntryType.BUDGET_CREATED);

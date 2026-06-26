@@ -42,6 +42,11 @@ public class ItemService {
         return itemRepository.findByQuantityLessThan(threshold);
     }
 
+    public List<Item> findByCommandIds(List<Long> commandIds) {
+        if (commandIds == null || commandIds.isEmpty()) return findAll();
+        return itemRepository.findByCommandIdIn(commandIds);
+    }
+
     public Item create(ItemRequest request) {
         Item item = new Item();
         applyRequest(item, request);
@@ -76,5 +81,6 @@ public class ItemService {
         } else {
             item.setWarehouse(null);
         }
+        item.setCommandId(request.getCommandId());
     }
 }

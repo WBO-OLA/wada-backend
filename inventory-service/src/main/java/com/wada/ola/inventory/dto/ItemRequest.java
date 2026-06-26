@@ -11,6 +11,7 @@ public class ItemRequest {
     private BigDecimal unitPrice;
     private String category;
     private Long warehouseId;
+    private Long commandId;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -32,4 +33,7 @@ public class ItemRequest {
 
     public Long getWarehouseId() { return warehouseId; }
     public void setWarehouseId(Long warehouseId) { this.warehouseId = warehouseId; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

@@ -10,4 +10,5 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     List<Income> findByRecordedBy(String recordedBy);
     List<Income> findByCommunityGroup(String communityGroup);
     List<Income> findByCountry(String country);
+    List<Income> findByCommandIdIn(List<Long> commandIds);
 }

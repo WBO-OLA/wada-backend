@@ -35,28 +35,34 @@ public class MemberService {
         this.commandRepository = commandRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findAll() {
         return memberRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Member findById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member", id));
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findByStatus(Member.MemberStatus status) {
         return memberRepository.findByStatus(status);
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findByCommandId(Long commandId) {
         return memberRepository.findByCommandId(commandId);
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findByCommandIds(List<Long> commandIds) {
         if (commandIds == null || commandIds.isEmpty()) return findAll();
         return memberRepository.findByCommandIdIn(commandIds);
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findByRank(Member.MilitaryRank rank) {
         return memberRepository.findByRank(rank);
     }
@@ -113,16 +119,19 @@ public class MemberService {
         return member;
     }
 
+    @Transactional(readOnly = true)
     public List<MemberStatusHistory> getStatusHistory(Long memberId) {
         findById(memberId);
         return statusHistoryRepository.findByMemberIdOrderByChangedAtDesc(memberId);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberRankHistory> getRankHistory(Long memberId) {
         findById(memberId);
         return rankHistoryRepository.findByMemberIdOrderByPromotedAtDesc(memberId);
     }
 
+    @Transactional
     public void delete(Long id) {
         memberRepository.delete(findById(id));
     }

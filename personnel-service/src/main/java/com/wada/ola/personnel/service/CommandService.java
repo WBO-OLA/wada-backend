@@ -6,6 +6,7 @@ import com.wada.ola.personnel.entity.Command;
 import com.wada.ola.personnel.repository.CommandRepository;
 import com.wada.ola.personnel.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,19 +22,23 @@ public class CommandService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Command> findAll() {
         return commandRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Command findById(Long id) {
         return commandRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Command", id));
     }
 
+    @Transactional(readOnly = true)
     public List<Command> findRoots() {
         return commandRepository.findByParentIsNull();
     }
 
+    @Transactional(readOnly = true)
     public List<Command> findChildren(Long parentId) {
         findById(parentId);
         return commandRepository.findByParentId(parentId);

@@ -21,8 +21,10 @@ public class BudgetController {
     }
 
     @GetMapping
-    public List<Budget> getAll(@RequestParam(required = false) Integer fiscalYear) {
-        return budgetService.findAll(fiscalYear);
+    public List<Budget> getAll(
+            @RequestParam(required = false) Integer fiscalYear,
+            @RequestParam(required = false) Long commandId) {
+        return budgetService.findAll(fiscalYear, commandId);
     }
 
     @GetMapping("/{id}")

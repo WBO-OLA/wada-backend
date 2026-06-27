@@ -20,8 +20,10 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public List<Expense> getAll(@RequestParam(required = false) String status) {
-        return expenseService.findAll(status);
+    public List<Expense> getAll(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long commandId) {
+        return expenseService.findAll(status, commandId);
     }
 
     @GetMapping("/{id}")

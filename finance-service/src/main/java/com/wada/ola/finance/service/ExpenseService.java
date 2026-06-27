@@ -31,10 +31,12 @@ public class ExpenseService {
         this.ledgerEntryRepository = ledgerEntryRepository;
     }
 
-    public List<Expense> findAll(String status) {
-        if (status != null && !status.isBlank()) {
-            return expenseRepository.findByStatus(ExpenseStatus.valueOf(status.toUpperCase()));
+    public List<Expense> findAll(String status, Long commandId) {
+        if (commandId != null && status != null && !status.isBlank()) {
+            return expenseRepository.findByCommandIdAndStatus(commandId, ExpenseStatus.valueOf(status.toUpperCase()));
         }
+        if (commandId != null) return expenseRepository.findByCommandId(commandId);
+        if (status != null && !status.isBlank()) return expenseRepository.findByStatus(ExpenseStatus.valueOf(status.toUpperCase()));
         return expenseRepository.findAll();
     }
 

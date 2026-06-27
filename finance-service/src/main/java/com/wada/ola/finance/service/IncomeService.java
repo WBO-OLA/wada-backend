@@ -25,7 +25,8 @@ public class IncomeService {
         this.ledgerEntryRepository = ledgerEntryRepository;
     }
 
-    public List<Income> findAll() {
+    public List<Income> findAll(Long commandId) {
+        if (commandId != null) return incomeRepository.findByCommandId(commandId);
         return incomeRepository.findAll();
     }
 
@@ -69,7 +70,7 @@ public class IncomeService {
     }
 
     public Map<String, BigDecimal> aggregateByGroup() {
-        return incomeRepository.findAll().stream()
+        return findAll(null).stream()
                 .collect(Collectors.groupingBy(
                         i -> i.getCommunityGroup() != null ? i.getCommunityGroup() : "Unknown",
                         Collectors.reducing(BigDecimal.ZERO, Income::getAmount, BigDecimal::add)
@@ -77,7 +78,7 @@ public class IncomeService {
     }
 
     public Map<String, BigDecimal> aggregateByCountry() {
-        return incomeRepository.findAll().stream()
+        return findAll(null).stream()
                 .collect(Collectors.groupingBy(
                         i -> i.getCountry() != null ? i.getCountry() : "Unknown",
                         Collectors.reducing(BigDecimal.ZERO, Income::getAmount, BigDecimal::add)
@@ -85,7 +86,7 @@ public class IncomeService {
     }
 
     public BigDecimal globalTotal() {
-        return incomeRepository.findAll().stream()
+        return findAll(null).stream()
                 .map(i -> i.getAmount() != null ? i.getAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

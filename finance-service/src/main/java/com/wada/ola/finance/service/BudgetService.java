@@ -25,10 +25,9 @@ public class BudgetService {
         this.ledgerEntryRepository = ledgerEntryRepository;
     }
 
-    public List<Budget> findAll(Integer fiscalYear) {
-        if (fiscalYear != null) {
-            return budgetRepository.findByFiscalYear(fiscalYear);
-        }
+    public List<Budget> findAll(Integer fiscalYear, Long commandId) {
+        if (commandId != null) return budgetRepository.findByCommandId(commandId);
+        if (fiscalYear != null) return budgetRepository.findByFiscalYear(fiscalYear);
         return budgetRepository.findAll();
     }
 

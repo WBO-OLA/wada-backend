@@ -22,8 +22,9 @@ public class IncomeController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Income>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(incomeService.findAll()));
+    public ResponseEntity<ApiResponse<List<Income>>> getAll(
+            @RequestParam(required = false) Long commandId) {
+        return ResponseEntity.ok(ApiResponse.ok(incomeService.findAll(commandId)));
     }
 
     @GetMapping("/{id}")

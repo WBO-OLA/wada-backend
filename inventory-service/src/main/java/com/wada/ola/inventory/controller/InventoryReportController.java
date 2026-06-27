@@ -6,6 +6,7 @@ import com.wada.ola.inventory.service.InventoryReportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,7 +20,8 @@ public class InventoryReportController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<ApiResponse<InventorySummaryDTO>> getSummary() {
-        return ResponseEntity.ok(ApiResponse.ok(reportService.getSummary()));
+    public ResponseEntity<ApiResponse<InventorySummaryDTO>> getSummary(
+            @RequestParam(required = false) Long commandId) {
+        return ResponseEntity.ok(ApiResponse.ok(reportService.getSummary(commandId)));
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Service
 public class InventoryReportService {
@@ -22,8 +23,16 @@ public class InventoryReportService {
     }
 
     public InventorySummaryDTO getSummary() {
-        List<Item> items = itemRepository.findAll();
-        List<Warehouse> warehouses = warehouseRepository.findAll();
+        return getSummary(null);
+    }
+
+    public InventorySummaryDTO getSummary(Long commandId) {
+        List<Item> items = commandId != null
+                ? itemRepository.findByCommandIdIn(Collections.singletonList(commandId))
+                : itemRepository.findAll();
+        List<Warehouse> warehouses = commandId != null
+                ? warehouseRepository.findByCommandId(commandId)
+                : warehouseRepository.findAll();
 
         InventorySummaryDTO dto = new InventorySummaryDTO();
         dto.setTotalItems(items.size());

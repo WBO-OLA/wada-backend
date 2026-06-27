@@ -25,12 +25,22 @@ public class FinanceReportService {
     }
 
     public FinanceSummaryDTO getSummary() {
-        var incomes = incomeRepository.findAll();
-        var budgets = budgetRepository.findAll();
-        var activeBudgets = budgetRepository.findByStatus(BudgetStatus.ACTIVE);
-        var expenses = expenseRepository.findAll();
-        var approvedExpenses = expenseRepository.findByStatus(ExpenseStatus.APPROVED);
-        var pendingExpenses = expenseRepository.findByStatus(ExpenseStatus.PENDING);
+        return getSummary(null);
+    }
+
+    public FinanceSummaryDTO getSummary(Long commandId) {
+        var incomes = commandId != null ? incomeRepository.findByCommandId(commandId) : incomeRepository.findAll();
+        var budgets = commandId != null ? budgetRepository.findByCommandId(commandId) : budgetRepository.findAll();
+        var activeBudgets = commandId != null
+                ? budgets.stream().filter(b -> b.getStatus() == BudgetStatus.ACTIVE).toList()
+                : budgetRepository.findByStatus(BudgetStatus.ACTIVE);
+        var expenses = commandId != null ? expenseRepository.findByCommandId(commandId) : expenseRepository.findAll();
+        var approvedExpenses = commandId != null
+                ? expenseRepository.findByCommandIdAndStatus(commandId, ExpenseStatus.APPROVED)
+                : expenseRepository.findByStatus(ExpenseStatus.APPROVED);
+        var pendingExpenses = commandId != null
+                ? expenseRepository.findByCommandIdAndStatus(commandId, ExpenseStatus.PENDING)
+                : expenseRepository.findByStatus(ExpenseStatus.PENDING);
 
         FinanceSummaryDTO dto = new FinanceSummaryDTO();
 

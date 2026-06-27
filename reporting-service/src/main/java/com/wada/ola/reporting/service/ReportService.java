@@ -21,14 +21,19 @@ public class ReportService {
     }
 
     public DashboardReport getDashboard() {
+        return getDashboard(null);
+    }
+
+    public DashboardReport getDashboard(Long commandId) {
+        String suffix = commandId != null ? "?commandId=" + commandId : "";
         PersonnelSummary personnel = fetch(
-                "http://personnel-service/api/personnel/reports/summary",
+                "http://personnel-service/api/personnel/reports/summary" + suffix,
                 PersonnelSummary.class);
         InventorySummary inventory = fetch(
-                "http://inventory-service/api/inventory/reports/summary",
+                "http://inventory-service/api/inventory/reports/summary" + suffix,
                 InventorySummary.class);
         FinanceSummary finance = fetch(
-                "http://finance-service/api/finance/reports/summary",
+                "http://finance-service/api/finance/reports/summary" + suffix,
                 FinanceSummary.class);
         return new DashboardReport(personnel, inventory, finance);
     }

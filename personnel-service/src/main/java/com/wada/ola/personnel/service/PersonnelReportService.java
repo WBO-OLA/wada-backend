@@ -18,7 +18,13 @@ public class PersonnelReportService {
     }
 
     public PersonnelSummaryDTO getSummary() {
-        List<Member> all = memberRepository.findAll();
+        return getSummary(null);
+    }
+
+    public PersonnelSummaryDTO getSummary(Long commandId) {
+        List<Member> all = commandId != null
+                ? memberRepository.findByCommandId(commandId)
+                : memberRepository.findAll();
         PersonnelSummaryDTO dto = new PersonnelSummaryDTO();
         dto.setTotalMembers(all.size());
         dto.setActive(all.stream().filter(m -> m.getStatus() == MemberStatus.ACTIVE).count());

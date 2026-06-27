@@ -6,6 +6,7 @@ public class AuditLogEntry {
     private String action;
     private String targetTable;
     private Long targetId;
+    private Long commandId;
     private String createdAt;
     private String sourceService;
 
@@ -19,6 +20,8 @@ public class AuditLogEntry {
     public void setTargetTable(String targetTable) { this.targetTable = targetTable; }
     public Long getTargetId() { return targetId; }
     public void setTargetId(Long targetId) { this.targetId = targetId; }
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     public String getSourceService() { return sourceService; }

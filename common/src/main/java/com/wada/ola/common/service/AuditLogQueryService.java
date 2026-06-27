@@ -20,13 +20,13 @@ public class AuditLogQueryService {
     private static final LocalDateTime EARLIEST = LocalDateTime.of(1970, 1, 1, 0, 0);
     private static final LocalDateTime LATEST = LocalDateTime.of(2999, 12, 31, 23, 59, 59);
 
-    public Page<AuditLog> search(String action, String targetTable,
+    public Page<AuditLog> search(String action, String targetTable, Long commandId,
                                   LocalDateTime from, LocalDateTime to,
                                   int page, int size) {
         // Postgres' JDBC driver can't infer a type for a bind parameter whose value is null,
         // so sentinel bounds are used instead of passing null timestamps into the query.
         return auditLogRepository.search(
-                blankToNull(action), blankToNull(targetTable),
+                blankToNull(action), blankToNull(targetTable), commandId,
                 from != null ? from : EARLIEST,
                 to != null ? to : LATEST,
                 PageRequest.of(Math.max(page, 0), size > 0 ? size : 20));

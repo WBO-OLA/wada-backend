@@ -36,6 +36,7 @@ public class AuditAspect {
             entry.setAction(audited.action());
             entry.setTargetTable(audited.targetTable());
             entry.setTargetId(resolveTargetId(joinPoint, result));
+            entry.setCommandId(resolveCommandId());
             auditLogRepository.save(entry);
         } catch (Exception e) {
             // Audit logging must never break the actual business operation.
@@ -44,12 +45,24 @@ public class AuditAspect {
     }
 
     private String resolveUsername() {
-        ServletRequestAttributes attrs =
-                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attrs == null) return "unknown";
-        HttpServletRequest request = attrs.getRequest();
+        HttpServletRequest request = currentRequest();
+        if (request == null) return "unknown";
         String user = request.getHeader("X-Auth-User");
         return user != null ? user : "unknown";
+    }
+
+    private Long resolveCommandId() {
+        HttpServletRequest request = currentRequest();
+        if (request == null) return null;
+        String header = request.getHeader("X-Command-Id");
+        if (header == null || header.isBlank()) return null;
+        try { return Long.parseLong(header.trim()); } catch (NumberFormatException e) { return null; }
+    }
+
+    private HttpServletRequest currentRequest() {
+        ServletRequestAttributes attrs =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        return attrs != null ? attrs.getRequest() : null;
     }
 
     private Long resolveTargetId(JoinPoint joinPoint, Object result) {

@@ -26,11 +26,12 @@ public class AuditLogController {
     public ResponseEntity<ApiResponse<Page<AuditLog>>> search(
             @RequestParam(required = false) String action,
             @RequestParam(required = false) String targetTable,
+            @RequestParam(required = false) Long commandId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.ok(
-                auditLogQueryService.search(action, targetTable, from, to, page, size)));
+                auditLogQueryService.search(action, targetTable, commandId, from, to, page, size)));
     }
 }

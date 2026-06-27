@@ -37,7 +37,8 @@ public class AuditLogAggregationService {
         this.objectMapper = objectMapper;
     }
 
-    public AuditLogPage search(String action, String targetTable, String from, String to,
+    public AuditLogPage search(String action, String targetTable, Long commandId,
+                                String from, String to,
                                 int page, int size, String authorization, String authRole) {
         // Over-fetch enough of each service's most-recent rows to cover the requested page
         // after merging — simple and correct for realistic data volumes, not true distributed
@@ -47,7 +48,7 @@ public class AuditLogAggregationService {
         List<AuditLogEntry> merged = new ArrayList<>();
         for (Map.Entry<String, String> source : SOURCES.entrySet()) {
             merged.addAll(fetchFrom(source.getKey(), source.getValue(),
-                    action, targetTable, from, to, fetchSize, authorization, authRole));
+                    action, targetTable, commandId, from, to, fetchSize, authorization, authRole));
         }
         merged.sort(Comparator.comparing(AuditLogEntry::getCreatedAt).reversed());
 
@@ -59,7 +60,8 @@ public class AuditLogAggregationService {
     }
 
     private List<AuditLogEntry> fetchFrom(String serviceName, String path,
-                                           String action, String targetTable, String from, String to,
+                                           String action, String targetTable, Long commandId,
+                                           String from, String to,
                                            int size, String authorization, String authRole) {
         List<AuditLogEntry> result = new ArrayList<>();
         try {
@@ -69,6 +71,7 @@ public class AuditLogAggregationService {
                     .queryParam("size", size);
             if (action != null) uri.queryParam("action", action);
             if (targetTable != null) uri.queryParam("targetTable", targetTable);
+            if (commandId != null) uri.queryParam("commandId", commandId);
             if (from != null) uri.queryParam("from", from);
             if (to != null) uri.queryParam("to", to);
 

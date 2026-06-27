@@ -14,10 +14,12 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     @Query("SELECT a FROM AuditLog a WHERE " +
             "(:action IS NULL OR a.action = :action) AND " +
             "(:targetTable IS NULL OR a.targetTable = :targetTable) AND " +
+            "(:commandId IS NULL OR a.commandId = :commandId) AND " +
             "a.createdAt >= :from AND a.createdAt <= :to " +
             "ORDER BY a.createdAt DESC")
     Page<AuditLog> search(@Param("action") String action,
                            @Param("targetTable") String targetTable,
+                           @Param("commandId") Long commandId,
                            @Param("from") LocalDateTime from,
                            @Param("to") LocalDateTime to,
                            Pageable pageable);

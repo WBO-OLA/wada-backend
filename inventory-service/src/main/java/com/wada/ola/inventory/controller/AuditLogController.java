@@ -27,6 +27,7 @@ public class AuditLogController {
             HttpServletRequest httpRequest,
             @RequestParam(required = false) String action,
             @RequestParam(required = false) String targetTable,
+            @RequestParam(required = false) Long commandId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
@@ -36,6 +37,6 @@ public class AuditLogController {
                     .body(ApiResponse.error("Admin role required"));
         }
         return ResponseEntity.ok(ApiResponse.ok(
-                auditLogQueryService.search(action, targetTable, from, to, page, size)));
+                auditLogQueryService.search(action, targetTable, commandId, from, to, page, size)));
     }
 }

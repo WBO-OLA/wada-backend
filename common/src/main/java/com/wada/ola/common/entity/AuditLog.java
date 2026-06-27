@@ -20,6 +20,9 @@ public class AuditLog extends BaseEntity {
     @Column(name = "target_id")
     private Long targetId;
 
+    @Column(name = "command_id")
+    private Long commandId;
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -31,4 +34,7 @@ public class AuditLog extends BaseEntity {
 
     public Long getTargetId() { return targetId; }
     public void setTargetId(Long targetId) { this.targetId = targetId; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

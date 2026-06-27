@@ -23,6 +23,7 @@ public class AuditLogController {
             HttpServletRequest httpRequest,
             @RequestParam(required = false) String action,
             @RequestParam(required = false) String targetTable,
+            @RequestParam(required = false) Long commandId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
             @RequestParam(defaultValue = "0") int page,
@@ -34,6 +35,6 @@ public class AuditLogController {
         }
         String authorization = httpRequest.getHeader("Authorization");
         return ResponseEntity.ok(ApiResponse.ok(
-                auditLogAggregationService.search(action, targetTable, from, to, page, size, authorization, authRole)));
+                auditLogAggregationService.search(action, targetTable, commandId, from, to, page, size, authorization, authRole)));
     }
 }

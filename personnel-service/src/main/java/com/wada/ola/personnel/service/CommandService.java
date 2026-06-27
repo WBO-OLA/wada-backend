@@ -64,13 +64,15 @@ public class CommandService {
     }
 
     public Command create(CommandRequest request) {
-        if (request.getCommanderId() == null) {
-            throw new IllegalArgumentException("Commander is required");
-        }
         Command command = new Command();
         applyRequest(command, request);
         command.setParent(resolveParent(null, request.getParentId()));
-        command.setCommander(resolveCommander(request.getCommanderId()));
+        // Commander optional on create — no members exist in a brand-new command yet
+        if (request.getCommanderId() != null) {
+            Member commander = resolveCommander(request.getCommanderId());
+            validateCommander(commander, null, null);
+            command.setCommander(commander);
+        }
         return commandRepository.save(command);
     }
 
@@ -79,16 +81,23 @@ public class CommandService {
             throw new IllegalArgumentException("Commander is required");
         }
         Command command = findById(id);
+        Member commander = resolveCommander(request.getCommanderId());
+        validateCommander(commander, id, command.getCommander());
         applyRequest(command, request);
         command.setParent(resolveParent(id, request.getParentId()));
-        command.setCommander(resolveCommander(request.getCommanderId()));
+        command.setCommander(commander);
         return commandRepository.save(command);
     }
 
     @Transactional
     public Command assignCommander(Long commandId, Long memberId) {
+        if (memberId == null) {
+            throw new IllegalArgumentException("Commander is required");
+        }
         Command command = findById(commandId);
-        command.setCommander(resolveCommander(memberId));
+        Member commander = resolveCommander(memberId);
+        validateCommander(commander, commandId, command.getCommander());
+        command.setCommander(commander);
         return commandRepository.save(command);
     }
 
@@ -123,6 +132,38 @@ public class CommandService {
         if (memberId == null) return null;
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member", memberId));
+    }
+
+    /**
+     * Validates that:
+     * 1. The member belongs to the target command (same-command rule).
+     * 2. The member is not already the commander of a different command (one-command rule).
+     *
+     * @param commander  the member being assigned
+     * @param commandId  the ID of the command being edited (null on create)
+     * @param current    the command's existing commander (null if none)
+     */
+    private void validateCommander(Member commander, Long commandId, Member current) {
+        // Rule 1: member must belong to this command
+        if (commandId != null) {
+            Long memberCommandId = commander.getCommand() != null ? commander.getCommand().getId() : null;
+            if (!commandId.equals(memberCommandId)) {
+                throw new IllegalArgumentException(
+                        commander.getFirstName() + " " + commander.getLastName() +
+                        " does not belong to this command and cannot be assigned as its commander.");
+            }
+        }
+
+        // Rule 2: member must not already command a different command
+        commandRepository.findByCommanderId(commander.getId()).ifPresent(existing -> {
+            boolean isSameCommand = commandId != null && existing.getId().equals(commandId);
+            boolean isSamePerson = current != null && current.getId().equals(commander.getId());
+            if (!isSameCommand && !isSamePerson) {
+                throw new IllegalArgumentException(
+                        commander.getFirstName() + " " + commander.getLastName() +
+                        " is already the commander of " + existing.getName() + ".");
+            }
+        });
     }
 
     private void applyRequest(Command command, CommandRequest request) {

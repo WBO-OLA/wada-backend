@@ -8,6 +8,7 @@ public class CommandRequest {
     private String description;
     private Command.CommandType type;
     private Long parentId;
+    private Long commanderId;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -20,4 +21,7 @@ public class CommandRequest {
 
     public Long getParentId() { return parentId; }
     public void setParentId(Long parentId) { this.parentId = parentId; }
+
+    public Long getCommanderId() { return commanderId; }
+    public void setCommanderId(Long commanderId) { this.commanderId = commanderId; }
 }

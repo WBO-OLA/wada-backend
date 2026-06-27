@@ -3,6 +3,7 @@ package com.wada.ola.personnel.service;
 import com.wada.ola.common.exception.ResourceNotFoundException;
 import com.wada.ola.personnel.dto.CommandRequest;
 import com.wada.ola.personnel.entity.Command;
+import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.repository.CommandRepository;
 import com.wada.ola.personnel.repository.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ public class CommandService {
         Command command = new Command();
         applyRequest(command, request);
         command.setParent(resolveParent(null, request.getParentId()));
+        command.setCommander(resolveCommander(request.getCommanderId()));
         return commandRepository.save(command);
     }
 
@@ -73,6 +75,14 @@ public class CommandService {
         Command command = findById(id);
         applyRequest(command, request);
         command.setParent(resolveParent(id, request.getParentId()));
+        command.setCommander(resolveCommander(request.getCommanderId()));
+        return commandRepository.save(command);
+    }
+
+    @Transactional
+    public Command assignCommander(Long commandId, Long memberId) {
+        Command command = findById(commandId);
+        command.setCommander(resolveCommander(memberId));
         return commandRepository.save(command);
     }
 
@@ -101,6 +111,12 @@ public class CommandService {
             }
         }
         return parent;
+    }
+
+    private Member resolveCommander(Long memberId) {
+        if (memberId == null) return null;
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member", memberId));
     }
 
     private void applyRequest(Command command, CommandRequest request) {

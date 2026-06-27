@@ -3,6 +3,7 @@ package com.wada.ola.personnel.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.wada.ola.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "commands")
@@ -24,6 +25,13 @@ public class Command extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private Command parent;
 
+    // Break circular serialization: when serializing a Command's commander (Member),
+    // stop at that Member's own `command` field to avoid Command→Member→Command loops.
+    @JsonIgnoreProperties("command")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "commander_id")
+    private Member commander;
+
     public enum CommandType {
         GLOBAL, CHIEF, ZONE, BRIGADE, REGION, UNIT
     }
@@ -39,4 +47,7 @@ public class Command extends BaseEntity {
 
     public Command getParent() { return parent; }
     public void setParent(Command parent) { this.parent = parent; }
+
+    public Member getCommander() { return commander; }
+    public void setCommander(Member commander) { this.commander = commander; }
 }

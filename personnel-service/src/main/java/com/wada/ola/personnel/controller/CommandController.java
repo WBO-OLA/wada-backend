@@ -7,6 +7,7 @@ import com.wada.ola.personnel.entity.Command;
 import com.wada.ola.personnel.service.CommandService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 import java.util.List;
 
@@ -51,6 +52,16 @@ public class CommandController {
     public ResponseEntity<ApiResponse<Command>> update(@PathVariable Long id,
                                                         @RequestBody CommandRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Command updated", commandService.update(id, request)));
+    }
+
+    @PatchMapping("/{id}/commander")
+    @Audited(action = "COMMAND_ASSIGN_COMMANDER", targetTable = "commands")
+    public ResponseEntity<ApiResponse<Command>> assignCommander(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Long memberId = body.get("memberId") != null
+                ? Long.valueOf(body.get("memberId").toString()) : null;
+        return ResponseEntity.ok(ApiResponse.ok("Commander assigned", commandService.assignCommander(id, memberId)));
     }
 
     @DeleteMapping("/{id}")

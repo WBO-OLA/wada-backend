@@ -105,6 +105,7 @@ public class CommandService {
 
     private void applyRequest(Command command, CommandRequest request) {
         command.setName(request.getName());
+        command.setDescription(request.getDescription());
         command.setType(request.getType());
     }
 }

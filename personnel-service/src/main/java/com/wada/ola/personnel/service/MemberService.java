@@ -4,14 +4,17 @@ import com.wada.ola.common.exception.ResourceNotFoundException;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
 import com.wada.ola.personnel.dto.MemberStatusUpdateRequest;
+import com.wada.ola.personnel.dto.MemberTransferRequest;
 import com.wada.ola.personnel.entity.Command;
 import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberRankHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
+import com.wada.ola.personnel.entity.MemberTransferHistory;
 import com.wada.ola.personnel.repository.CommandRepository;
 import com.wada.ola.personnel.repository.MemberRankHistoryRepository;
 import com.wada.ola.personnel.repository.MemberRepository;
 import com.wada.ola.personnel.repository.MemberStatusHistoryRepository;
+import com.wada.ola.personnel.repository.MemberTransferHistoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,15 +27,18 @@ public class MemberService {
     private final MemberStatusHistoryRepository statusHistoryRepository;
     private final MemberRankHistoryRepository rankHistoryRepository;
     private final CommandRepository commandRepository;
+    private final MemberTransferHistoryRepository transferHistoryRepository;
 
     public MemberService(MemberRepository memberRepository,
                          MemberStatusHistoryRepository statusHistoryRepository,
                          MemberRankHistoryRepository rankHistoryRepository,
-                         CommandRepository commandRepository) {
+                         CommandRepository commandRepository,
+                         MemberTransferHistoryRepository transferHistoryRepository) {
         this.memberRepository = memberRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.rankHistoryRepository = rankHistoryRepository;
         this.commandRepository = commandRepository;
+        this.transferHistoryRepository = transferHistoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -129,6 +135,37 @@ public class MemberService {
     public List<MemberRankHistory> getRankHistory(Long memberId) {
         findById(memberId);
         return rankHistoryRepository.findByMemberIdOrderByPromotedAtDesc(memberId);
+    }
+
+    @Transactional
+    public Member transfer(Long id, MemberTransferRequest request) {
+        Member member = findById(id);
+        Command fromCommand = member.getCommand();
+
+        Command toCommand = null;
+        if (request.getToCommandId() != null) {
+            toCommand = commandRepository.findById(request.getToCommandId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Command", request.getToCommandId()));
+        }
+
+        member.setCommand(toCommand);
+        memberRepository.save(member);
+
+        MemberTransferHistory history = new MemberTransferHistory();
+        history.setMember(member);
+        history.setFromCommand(fromCommand);
+        history.setToCommand(toCommand);
+        history.setTransferredBy(request.getTransferredBy());
+        history.setReason(request.getReason());
+        transferHistoryRepository.save(history);
+
+        return member;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberTransferHistory> getTransferHistory(Long memberId) {
+        findById(memberId);
+        return transferHistoryRepository.findByMemberIdOrderByTransferredAtDesc(memberId);
     }
 
     @Transactional

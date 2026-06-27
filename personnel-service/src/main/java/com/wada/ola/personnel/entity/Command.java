@@ -11,6 +11,8 @@ public class Command extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CommandType type;
@@ -23,11 +25,14 @@ public class Command extends BaseEntity {
     private Command parent;
 
     public enum CommandType {
-        GLOBAL, CHIEF, ZONE, REGION, UNIT
+        GLOBAL, CHIEF, ZONE, BRIGADE, REGION, UNIT
     }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public CommandType getType() { return type; }
     public void setType(CommandType type) { this.type = type; }

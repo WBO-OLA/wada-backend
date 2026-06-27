@@ -5,9 +5,11 @@ import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
 import com.wada.ola.personnel.dto.MemberStatusUpdateRequest;
+import com.wada.ola.personnel.dto.MemberTransferRequest;
 import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberRankHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
+import com.wada.ola.personnel.entity.MemberTransferHistory;
 import com.wada.ola.personnel.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +86,18 @@ public class MemberController {
     @GetMapping("/{id}/rank-history")
     public ResponseEntity<ApiResponse<List<MemberRankHistory>>> getRankHistory(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(memberService.getRankHistory(id)));
+    }
+
+    @PatchMapping("/{id}/transfer")
+    @Audited(action = "MEMBER_TRANSFER", targetTable = "members")
+    public ResponseEntity<ApiResponse<Member>> transfer(@PathVariable Long id,
+                                                         @RequestBody MemberTransferRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Member transferred", memberService.transfer(id, request)));
+    }
+
+    @GetMapping("/{id}/transfer-history")
+    public ResponseEntity<ApiResponse<List<MemberTransferHistory>>> getTransferHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(memberService.getTransferHistory(id)));
     }
 
     @DeleteMapping("/{id}")

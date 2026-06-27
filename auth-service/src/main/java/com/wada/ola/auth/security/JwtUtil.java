@@ -1,4 +1,4 @@
-﻿package com.wada.ola.auth.security;
+package com.wada.ola.auth.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

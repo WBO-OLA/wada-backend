@@ -1,5 +1,6 @@
 package com.wada.ola.inventory.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.inventory.dto.AssetAssignmentRequest;
 import com.wada.ola.inventory.entity.AssetAssignment;
@@ -33,11 +34,13 @@ public class AssetAssignmentController {
     }
 
     @PostMapping
+    @Audited(action = "ASSET_ASSIGN", targetTable = "asset_assignments")
     public ResponseEntity<ApiResponse<AssetAssignment>> assign(@RequestBody AssetAssignmentRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Asset assigned", service.assign(request)));
     }
 
     @PatchMapping("/{id}/return")
+    @Audited(action = "ASSET_RETURN", targetTable = "asset_assignments")
     public ResponseEntity<ApiResponse<AssetAssignment>> returnItem(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok("Asset returned", service.returnItem(id)));
     }

@@ -5,6 +5,7 @@ import com.wada.ola.auth.dto.LoginRequest;
 import com.wada.ola.auth.dto.RegisterRequest;
 import com.wada.ola.auth.dto.UserResponse;
 import com.wada.ola.auth.service.AuthService;
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,21 +40,38 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(authService.getByUsername(userDetails.getUsername())));
     }
 
+    /** Any authenticated user can list users */
     @GetMapping("/admin/users")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponse>>> listUsers() {
         return ResponseEntity.ok(ApiResponse.ok(authService.listUsers()));
     }
 
+    /** Any authenticated user can create a user — role hierarchy enforced in service */
+    @PostMapping("/admin/users")
+    @Audited(action = "USER_CREATE", targetTable = "users")
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
+            @RequestBody RegisterRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String callerRole = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("USER");
+        return ResponseEntity.ok(ApiResponse.ok("User created", authService.createUser(request, callerRole)));
+    }
+
+    /** Only ADMIN or CHIEF can change roles */
     @PatchMapping("/admin/users/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF')")
+    @Audited(action = "USER_ROLE_CHANGE", targetTable = "users")
     public ResponseEntity<ApiResponse<UserResponse>> updateRole(@PathVariable Long id,
                                                                  @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(ApiResponse.ok("Role updated", authService.updateRole(id, body.get("role"))));
     }
 
+    /** Only ADMIN or CHIEF can delete users */
     @DeleteMapping("/admin/users/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF')")
+    @Audited(action = "USER_DELETE", targetTable = "users")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         authService.softDeleteUser(id);
         return ResponseEntity.ok(ApiResponse.<Void>ok("User deleted", null));

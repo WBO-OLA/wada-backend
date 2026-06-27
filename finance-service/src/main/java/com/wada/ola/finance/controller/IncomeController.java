@@ -1,5 +1,6 @@
 package com.wada.ola.finance.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.finance.dto.IncomeRequest;
 import com.wada.ola.finance.entity.Income;
@@ -31,11 +32,13 @@ public class IncomeController {
     }
 
     @PostMapping
+    @Audited(action = "INCOME_CREATE", targetTable = "incomes")
     public ResponseEntity<ApiResponse<Income>> create(@RequestBody IncomeRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Income recorded", incomeService.create(request)));
     }
 
     @DeleteMapping("/{id}")
+    @Audited(action = "INCOME_DELETE", targetTable = "incomes")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         incomeService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Income deleted", null));

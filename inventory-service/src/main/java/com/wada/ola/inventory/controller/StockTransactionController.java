@@ -1,5 +1,6 @@
 package com.wada.ola.inventory.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.inventory.dto.StockTransactionRequest;
 import com.wada.ola.inventory.entity.StockTransaction;
@@ -25,18 +26,21 @@ public class StockTransactionController {
     }
 
     @PostMapping("/in")
+    @Audited(action = "STOCK_IN", targetTable = "stock_transactions")
     public ResponseEntity<ApiResponse<StockTransaction>> stockIn(@RequestBody StockTransactionRequest request) {
         request.setType(StockTransaction.TransactionType.IN);
         return ResponseEntity.ok(ApiResponse.ok("Stock received", stockTransactionService.process(request)));
     }
 
     @PostMapping("/out")
+    @Audited(action = "STOCK_OUT", targetTable = "stock_transactions")
     public ResponseEntity<ApiResponse<StockTransaction>> stockOut(@RequestBody StockTransactionRequest request) {
         request.setType(StockTransaction.TransactionType.OUT);
         return ResponseEntity.ok(ApiResponse.ok("Stock issued", stockTransactionService.process(request)));
     }
 
     @PostMapping("/adjustment")
+    @Audited(action = "STOCK_ADJUSTMENT", targetTable = "stock_transactions")
     public ResponseEntity<ApiResponse<StockTransaction>> adjust(@RequestBody StockTransactionRequest request) {
         request.setType(StockTransaction.TransactionType.ADJUSTMENT);
         return ResponseEntity.ok(ApiResponse.ok("Stock adjusted", stockTransactionService.process(request)));

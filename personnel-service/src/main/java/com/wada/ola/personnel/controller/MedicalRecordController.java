@@ -1,5 +1,6 @@
 package com.wada.ola.personnel.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.personnel.dto.MedicalRecordRequest;
 import com.wada.ola.personnel.entity.MedicalRecord;
@@ -24,12 +25,14 @@ public class MedicalRecordController {
     }
 
     @PostMapping("/members/{memberId}/medical-records")
+    @Audited(action = "MEDICAL_RECORD_CREATE", targetTable = "medical_records")
     public ResponseEntity<ApiResponse<MedicalRecord>> create(@PathVariable Long memberId,
                                                               @RequestBody MedicalRecordRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Medical record added", service.create(memberId, request)));
     }
 
     @DeleteMapping("/medical-records/{id}")
+    @Audited(action = "MEDICAL_RECORD_DELETE", targetTable = "medical_records")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.ok(ApiResponse.<Void>ok("Record deleted", null));

@@ -1,5 +1,6 @@
 package com.wada.ola.inventory.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.inventory.dto.WarehouseRequest;
 import com.wada.ola.inventory.entity.Item;
@@ -43,17 +44,20 @@ public class WarehouseController {
     }
 
     @PostMapping
+    @Audited(action = "WAREHOUSE_CREATE", targetTable = "warehouses")
     public ResponseEntity<ApiResponse<Warehouse>> create(@RequestBody WarehouseRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Warehouse created", warehouseService.create(request)));
     }
 
     @PutMapping("/{id}")
+    @Audited(action = "WAREHOUSE_UPDATE", targetTable = "warehouses")
     public ResponseEntity<ApiResponse<Warehouse>> update(@PathVariable Long id,
                                                           @RequestBody WarehouseRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Warehouse updated", warehouseService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
+    @Audited(action = "WAREHOUSE_DEACTIVATE", targetTable = "warehouses")
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable Long id) {
         warehouseService.deactivate(id);
         return ResponseEntity.ok(ApiResponse.ok("Warehouse deactivated", null));

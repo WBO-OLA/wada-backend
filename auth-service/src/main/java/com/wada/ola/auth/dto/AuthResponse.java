@@ -1,4 +1,4 @@
-﻿package com.wada.ola.auth.dto;
+package com.wada.ola.auth.dto;
 
 public class AuthResponse {
     private String token;

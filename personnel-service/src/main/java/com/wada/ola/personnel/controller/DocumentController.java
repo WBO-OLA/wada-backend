@@ -1,5 +1,6 @@
 package com.wada.ola.personnel.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.personnel.entity.MemberDocument;
 import com.wada.ola.personnel.service.DocumentService;
@@ -27,6 +28,7 @@ public class DocumentController {
     }
 
     @PostMapping("/api/personnel/members/{memberId}/documents")
+    @Audited(action = "DOCUMENT_UPLOAD", targetTable = "member_documents")
     public ResponseEntity<ApiResponse<MemberDocument>> upload(
             @PathVariable Long memberId,
             @RequestParam("file") MultipartFile file,
@@ -49,6 +51,7 @@ public class DocumentController {
     }
 
     @DeleteMapping("/api/personnel/documents/{docId}")
+    @Audited(action = "DOCUMENT_DELETE", targetTable = "member_documents")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long docId) throws IOException {
         documentService.delete(docId);
         return ResponseEntity.ok(ApiResponse.ok("Document deleted", null));

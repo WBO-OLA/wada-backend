@@ -1,5 +1,6 @@
 package com.wada.ola.inventory.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.inventory.dto.PurchaseOrderRequest;
 import com.wada.ola.inventory.entity.PurchaseOrder;
@@ -31,11 +32,13 @@ public class PurchaseOrderController {
     }
 
     @PostMapping
+    @Audited(action = "PURCHASE_ORDER_CREATE", targetTable = "purchase_orders")
     public ResponseEntity<ApiResponse<PurchaseOrder>> create(@RequestBody PurchaseOrderRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Purchase order created", service.create(request)));
     }
 
     @PatchMapping("/{id}/status")
+    @Audited(action = "PURCHASE_ORDER_STATUS_CHANGE", targetTable = "purchase_orders")
     public ResponseEntity<ApiResponse<PurchaseOrder>> updateStatus(@PathVariable Long id,
                                                                     @RequestBody Map<String, String> body) {
         PurchaseOrder.OrderStatus status = PurchaseOrder.OrderStatus.valueOf(body.get("status").toUpperCase());
@@ -43,6 +46,7 @@ public class PurchaseOrderController {
     }
 
     @DeleteMapping("/{id}")
+    @Audited(action = "PURCHASE_ORDER_DELETE", targetTable = "purchase_orders")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.ok(ApiResponse.<Void>ok("Purchase order deleted", null));

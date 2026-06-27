@@ -13,9 +13,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AuthService {
+
+    private static final Map<String, Integer> ROLE_LEVELS = Map.of(
+        "USER", 1, "MANAGER", 2, "CHIEF", 3, "ADMIN", 4
+    );
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -30,6 +35,7 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
+    /** Public registration — always creates USER role regardless of request body */
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsernameAndDeletedFalse(request.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
@@ -42,10 +48,39 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(User.Role.USER);
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         return new AuthResponse(token, user.getUsername(), user.getRole().name());
+    }
+
+    /** Authenticated user creates another user — enforces role hierarchy */
+    public UserResponse createUser(RegisterRequest request, String callerRole) {
+        String requestedRole = request.getRole() != null ? request.getRole().toUpperCase() : "USER";
+        int callerLevel = ROLE_LEVELS.getOrDefault(callerRole, 0);
+        int requestedLevel = ROLE_LEVELS.getOrDefault(requestedRole, 0);
+
+        if (requestedLevel > callerLevel) {
+            throw new IllegalArgumentException(
+                "Cannot create a user with role higher than your own (" + callerRole + ")");
+        }
+
+        if (userRepository.existsByUsernameAndDeletedFalse(request.getUsername())) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+        if (userRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(User.Role.valueOf(requestedRole));
+        userRepository.save(user);
+
+        return toResponse(user);
     }
 
     public AuthResponse login(LoginRequest request) {

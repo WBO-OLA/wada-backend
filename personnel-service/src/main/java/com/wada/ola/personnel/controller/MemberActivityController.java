@@ -1,5 +1,6 @@
 package com.wada.ola.personnel.controller;
 
+import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.personnel.dto.MemberActivityRequest;
 import com.wada.ola.personnel.entity.MemberActivity;
@@ -25,12 +26,14 @@ public class MemberActivityController {
     }
 
     @PostMapping("/members/{memberId}/activities")
+    @Audited(action = "MEMBER_ACTIVITY_CREATE", targetTable = "member_activities")
     public ResponseEntity<ApiResponse<MemberActivity>> create(@PathVariable Long memberId,
                                                                @RequestBody MemberActivityRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Activity added", activityService.create(memberId, request)));
     }
 
     @DeleteMapping("/activities/{activityId}")
+    @Audited(action = "MEMBER_ACTIVITY_DELETE", targetTable = "member_activities")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long activityId) {
         activityService.delete(activityId);
         return ResponseEntity.ok(ApiResponse.ok("Activity deleted", null));

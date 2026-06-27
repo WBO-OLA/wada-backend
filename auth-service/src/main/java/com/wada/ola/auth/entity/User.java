@@ -24,7 +24,7 @@ public class User extends BaseEntity {
     private boolean deleted = false;
     private LocalDateTime deletedAt;
 
-    public enum Role { USER, ADMIN, MANAGER }
+    public enum Role { USER, MANAGER, CHIEF, ADMIN }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

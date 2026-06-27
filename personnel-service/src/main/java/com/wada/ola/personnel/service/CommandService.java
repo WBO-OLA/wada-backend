@@ -64,6 +64,9 @@ public class CommandService {
     }
 
     public Command create(CommandRequest request) {
+        if (request.getCommanderId() == null) {
+            throw new IllegalArgumentException("Commander is required");
+        }
         Command command = new Command();
         applyRequest(command, request);
         command.setParent(resolveParent(null, request.getParentId()));
@@ -72,6 +75,9 @@ public class CommandService {
     }
 
     public Command update(Long id, CommandRequest request) {
+        if (request.getCommanderId() == null) {
+            throw new IllegalArgumentException("Commander is required");
+        }
         Command command = findById(id);
         applyRequest(command, request);
         command.setParent(resolveParent(id, request.getParentId()));

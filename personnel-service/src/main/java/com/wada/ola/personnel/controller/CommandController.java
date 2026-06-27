@@ -7,9 +7,8 @@ import com.wada.ola.personnel.entity.Command;
 import com.wada.ola.personnel.service.CommandService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/personnel/commands")

@@ -36,6 +36,7 @@ public class PurchaseOrder extends BaseEntity {
     private String orderedBy;
     private LocalDate expectedDeliveryDate;
     private String notes;
+    private Long commandId;
 
     public enum OrderStatus { PENDING, APPROVED, RECEIVED, CANCELLED }
 
@@ -71,4 +72,7 @@ public class PurchaseOrder extends BaseEntity {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

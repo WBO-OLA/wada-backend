@@ -22,8 +22,9 @@ public class PurchaseOrderController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<PurchaseOrder>>> getAll(
-            @RequestParam(required = false) PurchaseOrder.OrderStatus status) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(status)));
+            @RequestParam(required = false) PurchaseOrder.OrderStatus status,
+            @RequestParam(required = false) Long commandId) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(status, commandId)));
     }
 
     @GetMapping("/{id}")

@@ -7,4 +7,6 @@ import java.util.List;
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Long> {
     List<PurchaseOrder> findByStatusOrderByCreatedAtDesc(PurchaseOrder.OrderStatus status);
     List<PurchaseOrder> findAllByOrderByCreatedAtDesc();
+    List<PurchaseOrder> findByCommandIdOrderByCreatedAtDesc(Long commandId);
+    List<PurchaseOrder> findByCommandIdAndStatusOrderByCreatedAtDesc(Long commandId, PurchaseOrder.OrderStatus status);
 }

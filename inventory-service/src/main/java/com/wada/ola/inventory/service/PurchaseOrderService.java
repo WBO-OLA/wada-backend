@@ -18,8 +18,13 @@ public class PurchaseOrderService {
         this.repository = repository;
     }
 
-    public List<PurchaseOrder> findAll(PurchaseOrder.OrderStatus status) {
-        if (status != null) return repository.findByStatusOrderByCreatedAtDesc(status);
+    public List<PurchaseOrder> findAll(PurchaseOrder.OrderStatus status, Long commandId) {
+        if (commandId != null && status != null)
+            return repository.findByCommandIdAndStatusOrderByCreatedAtDesc(commandId, status);
+        if (commandId != null)
+            return repository.findByCommandIdOrderByCreatedAtDesc(commandId);
+        if (status != null)
+            return repository.findByStatusOrderByCreatedAtDesc(status);
         return repository.findAllByOrderByCreatedAtDesc();
     }
 
@@ -40,6 +45,7 @@ public class PurchaseOrderService {
         po.setOrderedBy(req.getOrderedBy());
         po.setExpectedDeliveryDate(req.getExpectedDeliveryDate());
         po.setNotes(req.getNotes());
+        po.setCommandId(req.getCommandId());
         return repository.save(po);
     }
 

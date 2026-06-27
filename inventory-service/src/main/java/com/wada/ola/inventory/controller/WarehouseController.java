@@ -26,10 +26,18 @@ public class WarehouseController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Warehouse>>> getAll(
-            @RequestParam(required = false) Boolean active) {
-        List<Warehouse> warehouses = (active != null && active)
-                ? warehouseService.findActive()
-                : warehouseService.findAll();
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) Long commandId) {
+        List<Warehouse> warehouses;
+        if (commandId != null && active != null && active) {
+            warehouses = warehouseService.findActiveByCommand(commandId);
+        } else if (commandId != null) {
+            warehouses = warehouseService.findByCommand(commandId);
+        } else if (active != null && active) {
+            warehouses = warehouseService.findActive();
+        } else {
+            warehouses = warehouseService.findAll();
+        }
         return ResponseEntity.ok(ApiResponse.ok(warehouses));
     }
 

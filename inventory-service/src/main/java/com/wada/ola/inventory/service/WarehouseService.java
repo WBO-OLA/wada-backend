@@ -25,6 +25,14 @@ public class WarehouseService {
         return warehouseRepository.findByActive(true);
     }
 
+    public List<Warehouse> findByCommand(Long commandId) {
+        return warehouseRepository.findByCommandId(commandId);
+    }
+
+    public List<Warehouse> findActiveByCommand(Long commandId) {
+        return warehouseRepository.findByActiveAndCommandId(true, commandId);
+    }
+
     public Warehouse findById(Long id) {
         return warehouseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse", id));
@@ -53,5 +61,6 @@ public class WarehouseService {
         warehouse.setLocation(request.getLocation());
         warehouse.setCapacity(request.getCapacity());
         warehouse.setDescription(request.getDescription());
+        warehouse.setCommandId(request.getCommandId());
     }
 }

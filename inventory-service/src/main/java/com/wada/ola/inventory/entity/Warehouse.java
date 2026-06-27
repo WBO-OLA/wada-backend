@@ -19,6 +19,8 @@ public class Warehouse extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 
+    private Long commandId;
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -33,4 +35,7 @@ public class Warehouse extends BaseEntity {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

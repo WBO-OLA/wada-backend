@@ -8,5 +8,7 @@ import java.util.Optional;
 
 public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
     List<Warehouse> findByActive(boolean active);
+    List<Warehouse> findByCommandId(Long commandId);
+    List<Warehouse> findByActiveAndCommandId(boolean active, Long commandId);
     Optional<Warehouse> findByName(String name);
 }

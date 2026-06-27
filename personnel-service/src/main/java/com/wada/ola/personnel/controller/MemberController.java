@@ -4,10 +4,12 @@ import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
+import com.wada.ola.personnel.dto.MemberResponsibilityUpdateRequest;
 import com.wada.ola.personnel.dto.MemberStatusUpdateRequest;
 import com.wada.ola.personnel.dto.MemberTransferRequest;
 import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberRankHistory;
+import com.wada.ola.personnel.entity.MemberResponsibilityHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
 import com.wada.ola.personnel.entity.MemberTransferHistory;
 import com.wada.ola.personnel.service.MemberService;
@@ -98,6 +100,18 @@ public class MemberController {
     @GetMapping("/{id}/transfer-history")
     public ResponseEntity<ApiResponse<List<MemberTransferHistory>>> getTransferHistory(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(memberService.getTransferHistory(id)));
+    }
+
+    @PatchMapping("/{id}/responsibility")
+    @Audited(action = "MEMBER_RESPONSIBILITY_CHANGE", targetTable = "members")
+    public ResponseEntity<ApiResponse<Member>> updateResponsibility(@PathVariable Long id,
+                                                                     @RequestBody MemberResponsibilityUpdateRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Responsibility updated", memberService.updateResponsibility(id, request)));
+    }
+
+    @GetMapping("/{id}/responsibility-history")
+    public ResponseEntity<ApiResponse<List<MemberResponsibilityHistory>>> getResponsibilityHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(memberService.getResponsibilityHistory(id)));
     }
 
     @DeleteMapping("/{id}")

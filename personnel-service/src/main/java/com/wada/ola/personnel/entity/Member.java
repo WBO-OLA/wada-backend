@@ -33,6 +33,7 @@ public class Member extends BaseEntity {
     private String photoPath;
     private String unit;
     private String role;
+    private String responsibility;
 
     private LocalDate dateOfBirth;
 
@@ -94,6 +95,9 @@ public class Member extends BaseEntity {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getResponsibility() { return responsibility; }
+    public void setResponsibility(String responsibility) { this.responsibility = responsibility; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }

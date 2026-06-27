@@ -3,16 +3,19 @@ package com.wada.ola.personnel.service;
 import com.wada.ola.common.exception.ResourceNotFoundException;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
+import com.wada.ola.personnel.dto.MemberResponsibilityUpdateRequest;
 import com.wada.ola.personnel.dto.MemberStatusUpdateRequest;
 import com.wada.ola.personnel.dto.MemberTransferRequest;
 import com.wada.ola.personnel.entity.Command;
 import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberRankHistory;
+import com.wada.ola.personnel.entity.MemberResponsibilityHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
 import com.wada.ola.personnel.entity.MemberTransferHistory;
 import com.wada.ola.personnel.repository.CommandRepository;
 import com.wada.ola.personnel.repository.MemberRankHistoryRepository;
 import com.wada.ola.personnel.repository.MemberRepository;
+import com.wada.ola.personnel.repository.MemberResponsibilityHistoryRepository;
 import com.wada.ola.personnel.repository.MemberStatusHistoryRepository;
 import com.wada.ola.personnel.repository.MemberTransferHistoryRepository;
 import org.springframework.stereotype.Service;
@@ -28,17 +31,20 @@ public class MemberService {
     private final MemberRankHistoryRepository rankHistoryRepository;
     private final CommandRepository commandRepository;
     private final MemberTransferHistoryRepository transferHistoryRepository;
+    private final MemberResponsibilityHistoryRepository responsibilityHistoryRepository;
 
     public MemberService(MemberRepository memberRepository,
                          MemberStatusHistoryRepository statusHistoryRepository,
                          MemberRankHistoryRepository rankHistoryRepository,
                          CommandRepository commandRepository,
-                         MemberTransferHistoryRepository transferHistoryRepository) {
+                         MemberTransferHistoryRepository transferHistoryRepository,
+                         MemberResponsibilityHistoryRepository responsibilityHistoryRepository) {
         this.memberRepository = memberRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.rankHistoryRepository = rankHistoryRepository;
         this.commandRepository = commandRepository;
         this.transferHistoryRepository = transferHistoryRepository;
+        this.responsibilityHistoryRepository = responsibilityHistoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -166,6 +172,31 @@ public class MemberService {
     public List<MemberTransferHistory> getTransferHistory(Long memberId) {
         findById(memberId);
         return transferHistoryRepository.findByMemberIdOrderByTransferredAtDesc(memberId);
+    }
+
+    @Transactional
+    public Member updateResponsibility(Long id, MemberResponsibilityUpdateRequest request) {
+        Member member = findById(id);
+        String previous = member.getResponsibility();
+
+        member.setResponsibility(request.getResponsibility());
+        memberRepository.save(member);
+
+        MemberResponsibilityHistory history = new MemberResponsibilityHistory();
+        history.setMember(member);
+        history.setPreviousResponsibility(previous);
+        history.setNewResponsibility(request.getResponsibility());
+        history.setChangedBy(request.getChangedBy());
+        history.setReason(request.getReason());
+        responsibilityHistoryRepository.save(history);
+
+        return member;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberResponsibilityHistory> getResponsibilityHistory(Long memberId) {
+        findById(memberId);
+        return responsibilityHistoryRepository.findByMemberIdOrderByChangedAtDesc(memberId);
     }
 
     @Transactional

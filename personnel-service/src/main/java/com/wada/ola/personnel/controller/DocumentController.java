@@ -2,11 +2,13 @@ package com.wada.ola.personnel.controller;
 
 import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
+import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberDocument;
 import com.wada.ola.personnel.service.DocumentService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,5 +57,21 @@ public class DocumentController {
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long docId) throws IOException {
         documentService.delete(docId);
         return ResponseEntity.ok(ApiResponse.ok("Document deleted", null));
+    }
+
+    @PostMapping("/api/personnel/members/{memberId}/photo")
+    @Audited(action = "MEMBER_PHOTO_UPLOAD", targetTable = "members")
+    public ResponseEntity<ApiResponse<Member>> uploadPhoto(
+            @PathVariable Long memberId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(ApiResponse.ok("Photo updated", documentService.uploadPhoto(memberId, file)));
+    }
+
+    @GetMapping("/api/personnel/members/{memberId}/photo")
+    public ResponseEntity<Resource> getPhoto(@PathVariable Long memberId) {
+        Resource resource = documentService.getPhoto(memberId);
+        MediaType mediaType = MediaTypeFactory.getMediaType(resource)
+                .orElse(MediaType.IMAGE_JPEG);
+        return ResponseEntity.ok().contentType(mediaType).body(resource);
     }
 }

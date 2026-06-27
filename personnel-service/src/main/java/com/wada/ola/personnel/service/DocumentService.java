@@ -74,6 +74,39 @@ public class DocumentService {
         return resource;
     }
 
+    public Member uploadPhoto(Long memberId, MultipartFile file) throws IOException {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member", memberId));
+
+        Path uploadPath = Paths.get(uploadDir);
+        Files.createDirectories(uploadPath);
+
+        if (member.getPhotoPath() != null) {
+            Files.deleteIfExists(uploadPath.resolve(member.getPhotoPath()));
+        }
+
+        String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String storedName = UUID.randomUUID() + (ext != null ? "." + ext : "");
+        Files.copy(file.getInputStream(), uploadPath.resolve(storedName), StandardCopyOption.REPLACE_EXISTING);
+
+        member.setPhotoPath(storedName);
+        return memberRepository.save(member);
+    }
+
+    public Resource getPhoto(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member", memberId));
+        if (member.getPhotoPath() == null) {
+            throw new ResourceNotFoundException("No photo found for member: " + memberId);
+        }
+        Path filePath = Paths.get(uploadDir).resolve(member.getPhotoPath());
+        Resource resource = new FileSystemResource(filePath);
+        if (!resource.exists()) {
+            throw new ResourceNotFoundException("Photo file missing on disk for member: " + memberId);
+        }
+        return resource;
+    }
+
     public void delete(Long docId) throws IOException {
         MemberDocument doc = findById(docId);
         Path filePath = Paths.get(uploadDir).resolve(doc.getStoredFileName());

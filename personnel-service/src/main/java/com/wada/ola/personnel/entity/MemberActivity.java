@@ -37,7 +37,7 @@ public class MemberActivity {
     }
 
     public enum ActivityType {
-        JOIN, PROMOTION, TRAINING, INJURY, MISSION, AWARD, RETIREMENT
+        JOIN, PROMOTION, TRAINING, INJURY, MISSION, MISSION_SUCCESS, MISSION_FAILED, AWARD, RETIREMENT
     }
 
     public Long getId() { return id; }

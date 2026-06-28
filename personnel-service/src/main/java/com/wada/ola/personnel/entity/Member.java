@@ -33,6 +33,11 @@ public class Member extends BaseEntity {
     private String photoPath;
     private String unit;
     private String role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_role")
+    private MemberRole memberRole;
+
     private String responsibility;
 
     private LocalDate dateOfBirth;
@@ -56,6 +61,23 @@ public class Member extends BaseEntity {
 
     public enum Gender {
         MALE, FEMALE, OTHER
+    }
+
+    public enum MemberRole {
+        COMMANDER,
+        DEPUTY_COMMANDER,
+        TAKIYAA,
+        SAGILII,
+        ABBAA_BUTTAA,
+        INTELLIGENCE_OFFICER,
+        LOGISTICS_OFFICER,
+        FINANCE_OFFICER,
+        MEDICAL_OFFICER,
+        COMMUNICATIONS_OFFICER,
+        TRAINING_OFFICER,
+        FIELD_OFFICER,
+        SQUAD_LEADER,
+        MEMBER
     }
 
     public enum MilitaryRank {
@@ -95,6 +117,9 @@ public class Member extends BaseEntity {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public MemberRole getMemberRole() { return memberRole; }
+    public void setMemberRole(MemberRole memberRole) { this.memberRole = memberRole; }
 
     public String getResponsibility() { return responsibility; }
     public void setResponsibility(String responsibility) { this.responsibility = responsibility; }

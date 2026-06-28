@@ -219,6 +219,7 @@ public class MemberService {
         member.setPhotoPath(request.getPhotoPath());
         member.setUnit(request.getUnit());
         member.setRole(request.getRole());
+        member.setMemberRole(request.getMemberRole());
         member.setDateOfBirth(request.getDateOfBirth());
         member.setJoinDate(request.getJoinDate());
         member.setRank(request.getRank());

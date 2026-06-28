@@ -19,6 +19,7 @@ public class MemberRequest {
     private String photoPath;
     private String unit;
     private String role;
+    private Member.MemberRole memberRole;
     private LocalDate dateOfBirth;
     private LocalDate joinDate;
     private Member.MilitaryRank rank;
@@ -52,6 +53,9 @@ public class MemberRequest {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public Member.MemberRole getMemberRole() { return memberRole; }
+    public void setMemberRole(Member.MemberRole memberRole) { this.memberRole = memberRole; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }

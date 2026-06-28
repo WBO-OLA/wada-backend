@@ -63,7 +63,12 @@ public class DocumentController {
     @Audited(action = "MEMBER_PHOTO_UPLOAD", targetTable = "members")
     public ResponseEntity<ApiResponse<Member>> uploadPhoto(
             @PathVariable Long memberId,
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole) throws IOException {
+        if (authRole == null || (!authRole.equals("ADMIN") && !authRole.equals("CHIEF"))) {
+            return ResponseEntity.status(403)
+                    .body(ApiResponse.error("Only Admin or Chief can upload profile photos."));
+        }
         return ResponseEntity.ok(ApiResponse.ok("Photo updated", documentService.uploadPhoto(memberId, file)));
     }
 

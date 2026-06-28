@@ -5,11 +5,13 @@ import com.wada.ola.common.dto.ApiResponse;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
 import com.wada.ola.personnel.dto.MemberResponsibilityUpdateRequest;
+import com.wada.ola.personnel.dto.MemberRoleUpdateRequest;
 import com.wada.ola.personnel.dto.MemberStatusUpdateRequest;
 import com.wada.ola.personnel.dto.MemberTransferRequest;
 import com.wada.ola.personnel.entity.Member;
 import com.wada.ola.personnel.entity.MemberRankHistory;
 import com.wada.ola.personnel.entity.MemberResponsibilityHistory;
+import com.wada.ola.personnel.entity.MemberRoleHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
 import com.wada.ola.personnel.entity.MemberTransferHistory;
 import com.wada.ola.personnel.service.CommandService;
@@ -135,6 +137,18 @@ public class MemberController {
     @GetMapping("/{id}/responsibility-history")
     public ResponseEntity<ApiResponse<List<MemberResponsibilityHistory>>> getResponsibilityHistory(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(memberService.getResponsibilityHistory(id)));
+    }
+
+    @PatchMapping("/{id}/member-role")
+    @Audited(action = "MEMBER_ROLE_CHANGE", targetTable = "members")
+    public ResponseEntity<ApiResponse<Member>> updateMemberRole(@PathVariable Long id,
+                                                                 @RequestBody MemberRoleUpdateRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Role updated", memberService.updateMemberRole(id, request)));
+    }
+
+    @GetMapping("/{id}/role-history")
+    public ResponseEntity<ApiResponse<List<MemberRoleHistory>>> getRoleHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(memberService.getRoleHistory(id)));
     }
 
     @DeleteMapping("/{id}")

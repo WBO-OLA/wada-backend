@@ -5,6 +5,7 @@ public class RegisterRequest {
     private String email;
     private String password;
     private String role;
+    private Long commandId;
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -17,4 +18,7 @@ public class RegisterRequest {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 }

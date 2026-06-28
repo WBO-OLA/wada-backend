@@ -51,8 +51,8 @@ public class AuthService {
         user.setRole(User.Role.USER);
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-        return new AuthResponse(token, user.getUsername(), user.getRole().name());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getCommandId());
+        return new AuthResponse(token, user.getUsername(), user.getRole().name(), user.getCommandId());
     }
 
     /** Authenticated user creates another user — enforces role hierarchy */
@@ -78,6 +78,7 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(User.Role.valueOf(requestedRole));
+        user.setCommandId(request.getCommandId());
         userRepository.save(user);
 
         return toResponse(user);
@@ -91,8 +92,8 @@ public class AuthService {
         User user = userRepository.findByUsernameAndDeletedFalse(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-        return new AuthResponse(token, user.getUsername(), user.getRole().name());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getCommandId());
+        return new AuthResponse(token, user.getUsername(), user.getRole().name(), user.getCommandId());
     }
 
     public UserResponse getByUsername(String username) {
@@ -126,6 +127,6 @@ public class AuthService {
 
     private UserResponse toResponse(User user) {
         return new UserResponse(user.getId(), user.getUsername(), user.getEmail(),
-                user.getRole().name(), user.getCreatedAt());
+                user.getRole().name(), user.getCommandId(), user.getCreatedAt());
     }
 }

@@ -12,6 +12,7 @@ import com.wada.ola.personnel.entity.MemberRankHistory;
 import com.wada.ola.personnel.entity.MemberResponsibilityHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
 import com.wada.ola.personnel.entity.MemberTransferHistory;
+import com.wada.ola.personnel.service.CommandService;
 import com.wada.ola.personnel.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +26,11 @@ import java.util.stream.Collectors;
 public class MemberController {
 
     private final MemberService memberService;
+    private final CommandService commandService;
 
-    public MemberController(MemberService memberService) {
+    public MemberController(MemberService memberService, CommandService commandService) {
         this.memberService = memberService;
+        this.commandService = commandService;
     }
 
     @GetMapping
@@ -35,7 +38,27 @@ public class MemberController {
             @RequestParam(required = false) Member.MemberStatus status,
             @RequestParam(required = false) Long commandId,
             @RequestParam(required = false) Member.MilitaryRank rank,
-            @RequestParam(required = false) String commandIds) {
+            @RequestParam(required = false) String commandIds,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+
+        boolean isGlobal = authRole == null || authRole.equals("CHIEF") || authRole.equals("ADMIN");
+
+        if (!isGlobal && authCommand != null && !authCommand.isBlank()) {
+            long scopedRoot = Long.parseLong(authCommand);
+            List<Long> scopedIds = commandService.getAllDescendantIds(scopedRoot);
+            List<Member> scoped = memberService.findByCommandIds(scopedIds);
+            if (status != null) {
+                final Member.MemberStatus s = status;
+                scoped = scoped.stream().filter(m -> m.getStatus() == s).collect(Collectors.toList());
+            }
+            if (rank != null) {
+                final Member.MilitaryRank r = rank;
+                scoped = scoped.stream().filter(m -> m.getRank() == r).collect(Collectors.toList());
+            }
+            return ResponseEntity.ok(ApiResponse.ok(scoped));
+        }
+
         List<Member> members;
         if (commandIds != null && !commandIds.isBlank()) {
             List<Long> ids = Arrays.stream(commandIds.split(","))

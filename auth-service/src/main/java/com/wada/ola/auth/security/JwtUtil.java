@@ -22,14 +22,16 @@ public class JwtUtil {
         this.expirationMs = expirationMs;
     }
 
-    public String generateToken(String username, String role) {
-        return Jwts.builder()
+    public String generateToken(String username, String role, Long commandId) {
+        var builder = Jwts.builder()
                 .subject(username)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(secretKey)
-                .compact();
+                .expiration(new Date(System.currentTimeMillis() + expirationMs));
+        if (commandId != null) {
+            builder.claim("commandId", commandId);
+        }
+        return builder.signWith(secretKey).compact();
     }
 
     public String extractUsername(String token) {
@@ -38,6 +40,12 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return parseClaims(token).get("role", String.class);
+    }
+
+    public Long extractCommandId(String token) {
+        Object val = parseClaims(token).get("commandId");
+        if (val == null) return null;
+        return ((Number) val).longValue();
     }
 
     public boolean isValid(String token) {

@@ -53,10 +53,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            Object commandIdClaim = claims.get("commandId");
+            String commandIdHeader = commandIdClaim != null ? String.valueOf(commandIdClaim) : "";
             ServerWebExchange mutated = exchange.mutate()
                     .request(r -> r
                             .header("X-Auth-User", claims.getSubject())
-                            .header("X-Auth-Role", claims.get("role", String.class)))
+                            .header("X-Auth-Role", claims.get("role", String.class))
+                            .header("X-Auth-Command", commandIdHeader))
                     .build();
             return chain.filter(mutated);
         } catch (JwtException | IllegalArgumentException e) {

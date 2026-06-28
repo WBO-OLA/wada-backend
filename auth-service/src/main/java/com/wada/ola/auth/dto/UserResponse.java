@@ -7,15 +7,17 @@ public class UserResponse {
     private String username;
     private String email;
     private String role;
+    private Long commandId;
     private LocalDateTime createdAt;
 
     public UserResponse() {}
 
-    public UserResponse(Long id, String username, String email, String role, LocalDateTime createdAt) {
+    public UserResponse(Long id, String username, String email, String role, Long commandId, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.role = role;
+        this.commandId = commandId;
         this.createdAt = createdAt;
     }
 
@@ -27,6 +29,8 @@ public class UserResponse {
     public void setEmail(String email) { this.email = email; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

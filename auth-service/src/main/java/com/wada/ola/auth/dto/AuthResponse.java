@@ -5,16 +5,19 @@ public class AuthResponse {
     private String tokenType = "Bearer";
     private String username;
     private String role;
+    private Long commandId;
 
-    public AuthResponse(String token, String username, String role) {
+    public AuthResponse(String token, String username, String role, Long commandId) {
         this.token = token;
         this.username = username;
         this.role = role;
+        this.commandId = commandId;
     }
 
     public String getToken() { return token; }
     public String getTokenType() { return tokenType; }
     public String getUsername() { return username; }
     public String getRole() { return role; }
+    public Long getCommandId() { return commandId; }
 }
 

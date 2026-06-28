@@ -21,6 +21,8 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    private Long commandId;
+
     private boolean deleted = false;
     private LocalDateTime deletedAt;
 
@@ -37,6 +39,9 @@ public class User extends BaseEntity {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+
+    public Long getCommandId() { return commandId; }
+    public void setCommandId(Long commandId) { this.commandId = commandId; }
 
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }

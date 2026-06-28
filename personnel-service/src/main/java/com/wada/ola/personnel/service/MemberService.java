@@ -230,6 +230,11 @@ public class MemberService {
         return roleHistoryRepository.findByMemberIdOrderByChangedAtDesc(memberId);
     }
 
+    @Transactional(readOnly = true)
+    public java.util.Optional<Member> findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
+
     @Transactional
     public void delete(Long id) {
         memberRepository.delete(findById(id));

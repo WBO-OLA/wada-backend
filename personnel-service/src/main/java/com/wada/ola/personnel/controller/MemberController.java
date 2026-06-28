@@ -151,6 +151,13 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponse.ok(memberService.getRoleHistory(id)));
     }
 
+    @GetMapping("/find-by-email")
+    public ResponseEntity<ApiResponse<Member>> findByEmail(@RequestParam String email) {
+        return memberService.findByEmail(email)
+                .map(m -> ResponseEntity.ok(ApiResponse.ok(m)))
+                .orElse(ResponseEntity.status(404).body(ApiResponse.error("No member registered with this email.")));
+    }
+
     @DeleteMapping("/{id}")
     @Audited(action = "MEMBER_DELETE", targetTable = "members")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {

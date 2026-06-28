@@ -59,13 +59,18 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("User created", authService.createUser(request, callerRole)));
     }
 
-    /** Only ADMIN or CHIEF can change roles */
+    /** Only ADMIN or CHIEF can change roles or reassign command */
     @PatchMapping("/admin/users/{id}/role")
     @PreAuthorize("hasAnyRole('ADMIN', 'CHIEF')")
     @Audited(action = "USER_ROLE_CHANGE", targetTable = "users")
-    public ResponseEntity<ApiResponse<UserResponse>> updateRole(@PathVariable Long id,
-                                                                 @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(ApiResponse.ok("Role updated", authService.updateRole(id, body.get("role"))));
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id,
+                                                                 @RequestBody Map<String, Object> body) {
+        String role = body.containsKey("role") ? (String) body.get("role") : null;
+        boolean commandIdProvided = body.containsKey("commandId");
+        Long commandId = commandIdProvided && body.get("commandId") != null
+                ? Long.valueOf(body.get("commandId").toString()) : null;
+        return ResponseEntity.ok(ApiResponse.ok("User updated",
+                authService.updateUser(id, role, commandId, commandIdProvided)));
     }
 
     /** Only ADMIN or CHIEF can delete users */

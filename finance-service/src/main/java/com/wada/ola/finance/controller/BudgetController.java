@@ -23,8 +23,18 @@ public class BudgetController {
     @GetMapping
     public List<Budget> getAll(
             @RequestParam(required = false) Integer fiscalYear,
-            @RequestParam(required = false) Long commandId) {
-        return budgetService.findAll(fiscalYear, commandId);
+            @RequestParam(required = false) Long commandId,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        Long scopedCommandId = resolveCommandId(authRole, authCommand, commandId);
+        return budgetService.findAll(fiscalYear, scopedCommandId);
+    }
+
+    private static Long resolveCommandId(String role, String authCommand, Long requested) {
+        boolean global = role == null || role.equals("CHIEF") || role.equals("ADMIN");
+        if (global) return requested;
+        if (authCommand != null && !authCommand.isBlank()) return Long.parseLong(authCommand);
+        return requested;
     }
 
     @GetMapping("/{id}")

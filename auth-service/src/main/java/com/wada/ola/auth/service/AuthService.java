@@ -107,13 +107,22 @@ public class AuthService {
                 .stream().map(this::toResponse).toList();
     }
 
-    public UserResponse updateRole(Long id, String role) {
+    public UserResponse updateUser(Long id, String role, Long commandId, boolean commandIdProvided) {
         User user = userRepository.findById(id)
                 .filter(u -> !u.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        user.setRole(User.Role.valueOf(role.toUpperCase()));
+        if (role != null && !role.isBlank()) {
+            user.setRole(User.Role.valueOf(role.toUpperCase()));
+        }
+        if (commandIdProvided) {
+            user.setCommandId(commandId);
+        }
         userRepository.save(user);
         return toResponse(user);
+    }
+
+    public UserResponse updateRole(Long id, String role) {
+        return updateUser(id, role, null, false);
     }
 
     public void softDeleteUser(Long id) {

@@ -26,7 +26,14 @@ public class ItemController {
     public ResponseEntity<ApiResponse<List<Item>>> getAll(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Long warehouseId,
-            @RequestParam(required = false) String commandIds) {
+            @RequestParam(required = false) String commandIds,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        boolean global = authRole == null || authRole.equals("CHIEF") || authRole.equals("ADMIN");
+        if (!global && authCommand != null && !authCommand.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.ok(
+                    itemService.findByCommandIds(List.of(Long.parseLong(authCommand)))));
+        }
         List<Item> items;
         if (commandIds != null && !commandIds.isBlank()) {
             List<Long> ids = Arrays.stream(commandIds.split(","))

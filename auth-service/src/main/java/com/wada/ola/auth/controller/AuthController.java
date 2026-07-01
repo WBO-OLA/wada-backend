@@ -2,6 +2,8 @@ package com.wada.ola.auth.controller;
 
 import com.wada.ola.auth.dto.AuthResponse;
 import com.wada.ola.auth.dto.LoginRequest;
+import com.wada.ola.auth.dto.MfaRequiredResponse;
+import com.wada.ola.auth.dto.OtpVerifyRequest;
 import com.wada.ola.auth.dto.RegisterRequest;
 import com.wada.ola.auth.dto.UserResponse;
 import com.wada.ola.auth.service.AuthService;
@@ -12,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +33,16 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Registered successfully", authService.register(request)));
     }
 
+    /** Step 1 — validates credentials, generates OTP, returns mfaSessionId (no JWT). */
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Login successful", authService.login(request)));
+    public ResponseEntity<ApiResponse<MfaRequiredResponse>> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("OTP sent", authService.login(request)));
+    }
+
+    /** Step 2 — validates OTP, issues JWT. */
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse<AuthResponse>> verifyOtp(@RequestBody OtpVerifyRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Login successful", authService.verifyOtp(request)));
     }
 
     @GetMapping("/me")

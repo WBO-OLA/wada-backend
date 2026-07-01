@@ -2,6 +2,7 @@ package com.wada.ola.auth.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OtpService {
 
     private static final Logger log = LoggerFactory.getLogger(OtpService.class);
-    private static final long OTP_VALID_SECONDS = 300; // 5 minutes
+
+    @Value("${mfa.otp-ttl-seconds:60}")
+    private long otpTtlSeconds;
+
+    @Value("${mfa.otp-max-attempts:3}")
+    private int maxOtpAttempts;
 
     private final Map<String, OtpSession> sessions = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
@@ -23,39 +29,43 @@ public class OtpService {
     public record OtpEntry(String sessionId, String otp) {}
 
     public OtpEntry generate(String username) {
-        // Remove any prior pending session for this user before creating a new one
         sessions.values().removeIf(s -> s.getUsername().equals(username));
-
         String sessionId = UUID.randomUUID().toString();
         String otp = String.format("%06d", random.nextInt(1_000_000));
-        Instant expiresAt = Instant.now().plusSeconds(OTP_VALID_SECONDS);
-        sessions.put(sessionId, new OtpSession(username, otp, expiresAt));
-        log.info("[MFA] OTP generated for user '{}' — session {}", username, sessionId);
+        Instant expiresAt = Instant.now().plusSeconds(otpTtlSeconds);
+        sessions.put(sessionId, new OtpSession(username, otp, expiresAt, maxOtpAttempts));
+        log.info("[MFA] OTP generated for '{}' — session {} (expires in {}s)", username, sessionId, otpTtlSeconds);
         return new OtpEntry(sessionId, otp);
     }
 
     /**
-     * Returns the username if sessionId + otp are valid and not expired; null otherwise.
-     * Always consumes the session on success.
+     * Validates the OTP. Returns a result describing success, invalid code,
+     * expiry, or max-attempts exceeded (which triggers an account lock upstream).
      */
-    public String verify(String sessionId, String otp) {
+    public OtpVerifyResult verify(String sessionId, String otp) {
         OtpSession session = sessions.get(sessionId);
         if (session == null) {
             log.warn("[MFA] verify failed — unknown session {}", sessionId);
-            return null;
+            return OtpVerifyResult.fail(null, OtpVerifyResult.FailReason.INVALID);
         }
         if (session.isExpired()) {
             sessions.remove(sessionId);
-            log.warn("[MFA] verify failed — session {} expired", sessionId);
-            return null;
+            log.warn("[MFA] verify failed — session expired for '{}'", session.getUsername());
+            return OtpVerifyResult.fail(session.getUsername(), OtpVerifyResult.FailReason.EXPIRED);
         }
         if (!session.getOtp().equals(otp)) {
-            log.warn("[MFA] verify failed — wrong OTP for session {}", sessionId);
-            return null;
+            boolean maxReached = session.incrementAndCheckMax();
+            if (maxReached) {
+                sessions.remove(sessionId);
+                log.warn("[MFA] max OTP attempts reached for '{}'", session.getUsername());
+                return OtpVerifyResult.fail(session.getUsername(), OtpVerifyResult.FailReason.MAX_ATTEMPTS);
+            }
+            log.warn("[MFA] wrong OTP for session {}", sessionId);
+            return OtpVerifyResult.fail(session.getUsername(), OtpVerifyResult.FailReason.INVALID);
         }
         sessions.remove(sessionId);
-        log.info("[MFA] OTP verified for user '{}'", session.getUsername());
-        return session.getUsername();
+        log.info("[MFA] OTP verified for '{}'", session.getUsername());
+        return OtpVerifyResult.success(session.getUsername());
     }
 
     @Scheduled(fixedDelay = 60_000)

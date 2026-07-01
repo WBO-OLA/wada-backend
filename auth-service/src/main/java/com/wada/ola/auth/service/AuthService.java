@@ -13,10 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,12 @@ public class AuthService {
 
     @Value("${mfa.otp-hint-enabled:true}")
     private boolean otpHintEnabled;
+
+    @Value("${mfa.login-max-attempts:5}")
+    private int maxLoginAttempts;
+
+    @Value("${mfa.lock-duration-minutes:15}")
+    private int lockDurationMinutes;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                        JwtUtil jwtUtil, AuthenticationManager authenticationManager,
@@ -70,36 +79,83 @@ public class AuthService {
     }
 
     /**
-     * Step 1 of MFA login: validates credentials, generates OTP, returns session ID.
+     * Step 1 of MFA login: validates credentials, enforces lockout, generates OTP.
      * JWT is NOT issued here — only after OTP verification.
      */
     public MfaRequiredResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        User user = userRepository.findByUsernameAndDeletedFalse(request.getUsername()).orElse(null);
 
-        User user = userRepository.findByUsernameAndDeletedFalse(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        // Reject immediately if the account is currently locked
+        if (user != null && user.isAccountLocked()) {
+            long minutesLeft = Duration.between(LocalDateTime.now(), user.getLockedUntil()).toMinutes() + 1;
+            throw new LockedException(
+                "Account is temporarily locked. Try again in " + minutesLeft + " minute(s).");
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            if (user != null) {
+                int attempts = user.getFailedLoginAttempts() + 1;
+                if (attempts >= maxLoginAttempts) {
+                    user.setFailedLoginAttempts(0);
+                    user.setLockedUntil(LocalDateTime.now().plusMinutes(lockDurationMinutes));
+                    userRepository.save(user);
+                    log.warn("[AUTH] Account '{}' locked after {} failed password attempts", user.getUsername(), attempts);
+                    throw new LockedException(
+                        "Too many failed attempts. Account locked for " + lockDurationMinutes + " minutes.");
+                }
+                user.setFailedLoginAttempts(attempts);
+                userRepository.save(user);
+                log.warn("[AUTH] Failed password attempt {}/{} for '{}'", attempts, maxLoginAttempts, user.getUsername());
+            }
+            throw e;
+        }
+
+        // Successful password auth — reset counter
+        if (user != null && (user.getFailedLoginAttempts() > 0 || user.getLockedUntil() != null)) {
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
+            userRepository.save(user);
+        }
 
         OtpService.OtpEntry entry = otpService.generate(user.getUsername());
-
-        // In production set mfa.otp-hint-enabled=false and deliver otp via email/SMS instead
         log.info("[MFA] OTP for '{}': {}", user.getUsername(), entry.otp());
         String hint = otpHintEnabled ? entry.otp() : null;
-
         return new MfaRequiredResponse(entry.sessionId(), hint);
     }
 
     /**
-     * Step 2 of MFA login: validates OTP session, issues JWT on success.
+     * Step 2 of MFA login: validates OTP, issues JWT on success.
+     * Locks the account if max OTP attempts are exceeded.
      */
     public AuthResponse verifyOtp(OtpVerifyRequest request) {
-        String username = otpService.verify(request.getMfaSessionId(), request.getOtp());
-        if (username == null) {
-            throw new IllegalArgumentException("Invalid or expired verification code");
+        OtpVerifyResult result = otpService.verify(request.getMfaSessionId(), request.getOtp());
+
+        if (!result.success()) {
+            switch (result.failReason()) {
+                case MAX_ATTEMPTS -> {
+                    if (result.username() != null) {
+                        userRepository.findByUsernameAndDeletedFalse(result.username()).ifPresent(u -> {
+                            u.setLockedUntil(LocalDateTime.now().plusMinutes(lockDurationMinutes));
+                            u.setFailedLoginAttempts(0);
+                            userRepository.save(u);
+                            log.warn("[MFA] Account '{}' locked after max OTP attempts", u.getUsername());
+                        });
+                    }
+                    throw new LockedException(
+                        "Too many incorrect codes. Account locked for " + lockDurationMinutes + " minutes.");
+                }
+                case EXPIRED ->
+                    throw new IllegalArgumentException("Verification code has expired. Please sign in again.");
+                default ->
+                    throw new IllegalArgumentException("Invalid verification code. Please try again.");
+            }
         }
 
-        User user = userRepository.findByUsernameAndDeletedFalse(username)
+        User user = userRepository.findByUsernameAndDeletedFalse(result.username())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getCommandId());

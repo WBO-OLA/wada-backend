@@ -9,8 +9,11 @@ import com.wada.ola.auth.dto.UserResponse;
 import com.wada.ola.auth.service.AuthService;
 import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -81,6 +84,18 @@ public class AuthController {
                 ? Long.valueOf(body.get("commandId").toString()) : null;
         return ResponseEntity.ok(ApiResponse.ok("User updated",
                 authService.updateUser(id, role, commandId, commandIdProvided)));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Invalid credentials"));
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLocked(LockedException ex) {
+        return ResponseEntity.status(HttpStatus.LOCKED)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     /** Only ADMIN or CHIEF can delete users */

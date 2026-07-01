@@ -38,6 +38,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final OtpService otpService;
+    private final EmailService emailService;
 
     @Value("${mfa.otp-hint-enabled:true}")
     private boolean otpHintEnabled;
@@ -50,12 +51,13 @@ public class AuthService {
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                        JwtUtil jwtUtil, AuthenticationManager authenticationManager,
-                       OtpService otpService) {
+                       OtpService otpService, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.otpService = otpService;
+        this.emailService = emailService;
     }
 
     /** Public registration — always creates USER role regardless of request body */
@@ -123,8 +125,13 @@ public class AuthService {
 
         OtpService.OtpEntry entry = otpService.generate(user.getUsername());
         log.info("[MFA] OTP for '{}': {}", user.getUsername(), entry.otp());
+
+        // Attempt email delivery; fall back to hint if SMTP not configured
+        emailService.sendOtp(user.getEmail(), user.getUsername(), entry.otp());
+
         String hint = otpHintEnabled ? entry.otp() : null;
-        return new MfaRequiredResponse(entry.sessionId(), hint);
+        String emailMasked = emailService.mask(user.getEmail());
+        return new MfaRequiredResponse(entry.sessionId(), hint, emailMasked);
     }
 
     /**

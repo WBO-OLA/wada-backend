@@ -18,13 +18,25 @@ public class PersonnelReportService {
     }
 
     public PersonnelSummaryDTO getSummary() {
-        return getSummary(null);
+        return getSummary((Long) null);
     }
 
     public PersonnelSummaryDTO getSummary(Long commandId) {
         List<Member> all = commandId != null
                 ? memberRepository.findByCommandId(commandId)
                 : memberRepository.findAll();
+        return summarize(all);
+    }
+
+    /** Summary restricted to a set of commands — used to scope a zone manager to their subtree. */
+    public PersonnelSummaryDTO getSummary(List<Long> commandIds) {
+        List<Member> all = (commandIds == null || commandIds.isEmpty())
+                ? memberRepository.findAll()
+                : memberRepository.findByCommandIdIn(commandIds);
+        return summarize(all);
+    }
+
+    private PersonnelSummaryDTO summarize(List<Member> all) {
         PersonnelSummaryDTO dto = new PersonnelSummaryDTO();
         dto.setTotalMembers(all.size());
         dto.setActive(all.stream().filter(m -> m.getStatus() == MemberStatus.ACTIVE).count());

@@ -2,6 +2,7 @@ package com.wada.ola.personnel.controller;
 
 import com.wada.ola.common.annotation.Audited;
 import com.wada.ola.common.dto.ApiResponse;
+import com.wada.ola.personnel.dto.LifetimeSummaryDTO;
 import com.wada.ola.personnel.dto.MemberRankUpdateRequest;
 import com.wada.ola.personnel.dto.MemberRequest;
 import com.wada.ola.personnel.dto.MemberResponsibilityUpdateRequest;
@@ -14,7 +15,8 @@ import com.wada.ola.personnel.entity.MemberResponsibilityHistory;
 import com.wada.ola.personnel.entity.MemberRoleHistory;
 import com.wada.ola.personnel.entity.MemberStatusHistory;
 import com.wada.ola.personnel.entity.MemberTransferHistory;
-import com.wada.ola.personnel.service.CommandService;
+import com.wada.ola.personnel.security.MemberAccessGuard;
+import com.wada.ola.personnel.service.MemberLifetimeService;
 import com.wada.ola.personnel.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,11 +30,14 @@ import java.util.stream.Collectors;
 public class MemberController {
 
     private final MemberService memberService;
-    private final CommandService commandService;
+    private final MemberLifetimeService lifetimeService;
+    private final MemberAccessGuard accessGuard;
 
-    public MemberController(MemberService memberService, CommandService commandService) {
+    public MemberController(MemberService memberService,
+                            MemberLifetimeService lifetimeService, MemberAccessGuard accessGuard) {
         this.memberService = memberService;
-        this.commandService = commandService;
+        this.lifetimeService = lifetimeService;
+        this.accessGuard = accessGuard;
     }
 
     @GetMapping
@@ -44,11 +49,10 @@ public class MemberController {
             @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
             @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
 
-        boolean isGlobal = authRole == null || authRole.equals("CHIEF") || authRole.equals("ADMIN");
-
-        if (!isGlobal && authCommand != null && !authCommand.isBlank()) {
-            long scopedRoot = Long.parseLong(authCommand);
-            List<Long> scopedIds = commandService.getAllDescendantIds(scopedRoot);
+        if (!accessGuard.isGlobal(authRole)) {
+            // Zone-scoped caller: confined to their own command subtree. A caller with no
+            // zone assigned is denied (scopedCommandIds throws) rather than shown everything.
+            List<Long> scopedIds = accessGuard.scopedCommandIds(authCommand);
             List<Member> scoped = memberService.findByCommandIds(scopedIds);
             if (status != null) {
                 final Member.MemberStatus s = status;
@@ -74,93 +78,170 @@ public class MemberController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Member>> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Member>> getById(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok(memberService.findById(id)));
     }
 
     @PostMapping
     @Audited(action = "MEMBER_CREATE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> create(@RequestBody MemberRequest request) {
+    public ResponseEntity<ApiResponse<Member>> create(
+            @RequestBody MemberRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        // A zone-scoped caller may only register members into their own zone.
+        accessGuard.assertCanTargetCommand(authRole, authCommand, request.getCommandId());
         return ResponseEntity.ok(ApiResponse.ok("Member registered", memberService.create(request)));
     }
 
     @PutMapping("/{id}")
     @Audited(action = "MEMBER_UPDATE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> update(@PathVariable Long id,
-                                                       @RequestBody MemberRequest request) {
+    public ResponseEntity<ApiResponse<Member>> update(
+            @PathVariable Long id,
+            @RequestBody MemberRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
+        // Prevent a zone-scoped caller from moving the member out of their zone via the command field.
+        accessGuard.assertCanTargetCommand(authRole, authCommand, request.getCommandId());
         return ResponseEntity.ok(ApiResponse.ok("Member updated", memberService.update(id, request)));
     }
 
     @PatchMapping("/{id}/status")
     @Audited(action = "MEMBER_STATUS_CHANGE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> updateStatus(@PathVariable Long id,
-                                                             @RequestBody MemberStatusUpdateRequest request) {
+    public ResponseEntity<ApiResponse<Member>> updateStatus(
+            @PathVariable Long id,
+            @RequestBody MemberStatusUpdateRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok("Status updated", memberService.updateStatus(id, request)));
     }
 
     @PatchMapping("/{id}/rank")
     @Audited(action = "MEMBER_RANK_CHANGE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> promoteRank(@PathVariable Long id,
-                                                            @RequestBody MemberRankUpdateRequest request) {
+    public ResponseEntity<ApiResponse<Member>> promoteRank(
+            @PathVariable Long id,
+            @RequestBody MemberRankUpdateRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok("Rank updated", memberService.promoteRank(id, request)));
     }
 
     @GetMapping("/{id}/status-history")
-    public ResponseEntity<ApiResponse<List<MemberStatusHistory>>> getStatusHistory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<List<MemberStatusHistory>>> getStatusHistory(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok(memberService.getStatusHistory(id)));
     }
 
     @GetMapping("/{id}/rank-history")
-    public ResponseEntity<ApiResponse<List<MemberRankHistory>>> getRankHistory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<List<MemberRankHistory>>> getRankHistory(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok(memberService.getRankHistory(id)));
     }
 
     @PatchMapping("/{id}/transfer")
     @Audited(action = "MEMBER_TRANSFER", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> transfer(@PathVariable Long id,
-                                                         @RequestBody MemberTransferRequest request) {
+    public ResponseEntity<ApiResponse<Member>> transfer(
+            @PathVariable Long id,
+            @RequestBody MemberTransferRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
+        // A zone-scoped caller may only transfer members to a command inside their own zone.
+        accessGuard.assertCanTargetCommand(authRole, authCommand, request.getToCommandId());
         return ResponseEntity.ok(ApiResponse.ok("Member transferred", memberService.transfer(id, request)));
     }
 
     @GetMapping("/{id}/transfer-history")
-    public ResponseEntity<ApiResponse<List<MemberTransferHistory>>> getTransferHistory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<List<MemberTransferHistory>>> getTransferHistory(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok(memberService.getTransferHistory(id)));
     }
 
     @PatchMapping("/{id}/responsibility")
     @Audited(action = "MEMBER_RESPONSIBILITY_CHANGE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> updateResponsibility(@PathVariable Long id,
-                                                                     @RequestBody MemberResponsibilityUpdateRequest request) {
+    public ResponseEntity<ApiResponse<Member>> updateResponsibility(
+            @PathVariable Long id,
+            @RequestBody MemberResponsibilityUpdateRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok("Responsibility updated", memberService.updateResponsibility(id, request)));
     }
 
     @GetMapping("/{id}/responsibility-history")
-    public ResponseEntity<ApiResponse<List<MemberResponsibilityHistory>>> getResponsibilityHistory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<List<MemberResponsibilityHistory>>> getResponsibilityHistory(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok(memberService.getResponsibilityHistory(id)));
     }
 
     @PatchMapping("/{id}/member-role")
     @Audited(action = "MEMBER_ROLE_CHANGE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Member>> updateMemberRole(@PathVariable Long id,
-                                                                 @RequestBody MemberRoleUpdateRequest request) {
+    public ResponseEntity<ApiResponse<Member>> updateMemberRole(
+            @PathVariable Long id,
+            @RequestBody MemberRoleUpdateRequest request,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok("Role updated", memberService.updateMemberRole(id, request)));
     }
 
     @GetMapping("/{id}/role-history")
-    public ResponseEntity<ApiResponse<List<MemberRoleHistory>>> getRoleHistory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<List<MemberRoleHistory>>> getRoleHistory(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         return ResponseEntity.ok(ApiResponse.ok(memberService.getRoleHistory(id)));
     }
 
     @GetMapping("/find-by-email")
-    public ResponseEntity<ApiResponse<Member>> findByEmail(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<Member>> findByEmail(
+            @RequestParam String email,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
         return memberService.findByEmail(email)
-                .map(m -> ResponseEntity.ok(ApiResponse.ok(m)))
+                .map(m -> {
+                    accessGuard.assertCanAccessMember(authRole, authCommand, m.getId());
+                    return ResponseEntity.ok(ApiResponse.ok(m));
+                })
                 .orElse(ResponseEntity.status(404).body(ApiResponse.error("No member registered with this email.")));
+    }
+
+    /** ── Unified Individual Lifetime Record ── */
+    @GetMapping("/{id}/lifetime")
+    public ResponseEntity<ApiResponse<LifetimeSummaryDTO>> getLifetime(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
+        return ResponseEntity.ok(ApiResponse.ok(lifetimeService.buildLifetime(id)));
     }
 
     @DeleteMapping("/{id}")
     @Audited(action = "MEMBER_DELETE", targetTable = "members")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Role", required = false) String authRole,
+            @RequestHeader(value = "X-Auth-Command", required = false) String authCommand) {
+        accessGuard.assertCanAccessMember(authRole, authCommand, id);
         memberService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Member deleted", null));
     }
